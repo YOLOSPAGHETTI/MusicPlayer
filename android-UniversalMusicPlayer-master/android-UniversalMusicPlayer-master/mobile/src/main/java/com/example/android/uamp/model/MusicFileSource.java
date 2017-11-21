@@ -34,6 +34,7 @@ public class MusicFileSource implements MusicProviderSource {
 
     private static final String TAG = LogHelper.makeLogTag(MusicFileSource.class);
 
+    private ArrayList<MediaMetadataCompat> tracks;
     private ArrayList<File> allMusicFiles = new ArrayList<File>();
 
     private DBBuilder DBB;
@@ -45,18 +46,15 @@ public class MusicFileSource implements MusicProviderSource {
 
     @Override
     public Iterator<MediaMetadataCompat> iterator() {
-
-        ArrayList<MediaMetadataCompat> tracks;
+        tracks = new ArrayList<>();
         if (DBB.isEmpty()) {
             populateDBWithMusicFiles();
         }
         else {
-            completionPerc = 100;
         }
+        populateTracksFromDB();
         //Looper.prepare();
         //DBJob job = new DBJob(DBB);
-
-        tracks = populateTracksFromDB();
 
         return tracks.iterator();
     }
@@ -107,31 +105,11 @@ public class MusicFileSource implements MusicProviderSource {
 
                 LogHelper.d(TAG, "Found music track: ", title);
 
-                // Since we don't have a unique ID in the server, we fake one using the hashcode of
-                // the music source. In a real world app, this could come from the server.
-                String id = "" + i;
-
                 if (genre == null) {
                     genre = "Unknown";
                 }
 
-                MediaMetadataCompat metadata = new MediaMetadataCompat.Builder()
-                        .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, id)
-                        .putString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE, source)
-                        .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
-                        .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
-                        .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, albumArtist)
-                        .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
-                        .putString(MediaMetadataCompat.METADATA_KEY_GENRE, genre)
-                        .putLong(MediaMetadataCompat.METADATA_KEY_YEAR, year)
-                        .putLong(MusicProviderSource.CUSTOM_METADATA_TRACK_DECADE, decade)
-                        //.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap)
-                        .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
-                        .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, trackNumber)
-                        .putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, totalTrackCount)
-                        .build();
-
-                DBB.insertFromMetadata(metadata);
+                DBB.insertFromMetadata(new String[]{source, artist, album, albumArtist, genre, title}, new Integer[]{duration, year, decade, trackNumber, totalTrackCount});
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -139,14 +117,15 @@ public class MusicFileSource implements MusicProviderSource {
     }
 
     // Grabs all the id3 data from the DB to populate the music tracks
-    private ArrayList<MediaMetadataCompat> populateTracksFromDB() {
+    private void populateTracksFromDB() {
         ArrayList<MediaMetadataCompat> tracks = new ArrayList<>();
         String[] projection = {"ID", "Title", "Album", "Artist", "AlbumArtist", "Genre", "Year", "Decade", "Source", "TrackNumber", "TotalTrackCount", "Duration"};
         String[] selectionArgs = {"%"};
         List[] data = DBB.normalQuery("Songs", projection, "ID like ?", selectionArgs, null, projection.length);
         if(data[0] != null) {
         for (int i = 0; i < data[0].size(); i++) {
-
+            float completionDec = (float)i / (float)(data[0].size()-1);
+            completionPerc = Math.round(completionDec*100);
             try {
                 String id = ignoreNulls(data[0].get(i));
                 String title = ignoreNulls(data[1].get(i));
@@ -187,7 +166,6 @@ public class MusicFileSource implements MusicProviderSource {
             }
         }
         }
-        return tracks;
     }
 
     // Returns -1 for any characters entered in expected number fields, otherwise returns the number

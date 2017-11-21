@@ -50,11 +50,11 @@ public class MusicProvider {
 
     private DBBuilder DBB;
     private ArrayList sortOrder;
-    private List level1 = new ArrayList<>();
-    private List level2 = new ArrayList<>();
-    private List level3 = new ArrayList<>();
-    private List level4 = new ArrayList<>();
-    private List level5 = new ArrayList<>();
+    private List level1 = new ArrayList<String>();
+    private List level2 = new ArrayList<String>();
+    private List level3 = new ArrayList<String>();
+    private List level4 = new ArrayList<String>();
+    private List level5 = new ArrayList<String>();
     private List songList = new ArrayList<String>();
     private List artistList = new ArrayList<String>();
     private List albumList = new ArrayList<String>();

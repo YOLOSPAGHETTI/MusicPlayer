@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.support.v4.media.MediaMetadataCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,30 +102,39 @@ public class DBBuilder extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_SONG_GENRES);
     }
 
-    void insertFromMetadata(MediaMetadataCompat item) {
-        boolean newSource = getNewSource(item.getString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE));
+    void insertFromMetadata(String[] strings, Integer[] nums) {
+
+        String source = strings[0];
+        String artist = strings[1];
+        String album = strings[2];
+        String albumArtist = strings[3];
+        String genre = strings[4];
+        String title = strings[5];
+        int duration = nums[0];
+        int trackNumber = nums[3];
+
+        boolean newSource = getNewSource(source);
 
         if(newSource) {
             // Values for one row
-            ArrayList<String> artists = parseArtists(item.getString(MediaMetadataCompat.METADATA_KEY_ARTIST), item.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
-
+            ArrayList<String> artists = parseArtists(artist, title);
             for (int i = 0; i < artists.size(); i++) {
                 insertArtist(artists.get(i));
             }
 
-            String genreText = item.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
+            String genreText = genre;
             String[] genres;
 
             if (genreText != null) {
                 genres = genreText.split(",");
-                for (String genre : genres) {
-                    insertGenre(genre);
+                for (String aGenre : genres) {
+                    insertGenre(aGenre);
                 }
             }
 
-            insertAlbum(item);
+            insertAlbum(album, albumArtist, trackNumber, duration);
 
-            insertSong(item);
+            insertSong(strings, nums);
         }
     }
 
@@ -161,8 +169,7 @@ public class DBBuilder extends SQLiteOpenHelper {
     }
 
     // Inserts an album into the database
-    private void insertAlbum(MediaMetadataCompat item) {
-        String album = item.getString(MediaMetadataCompat.METADATA_KEY_ALBUM);
+    private void insertAlbum(String album, String songAlbumArtist, int trackNumber, int duration) {
         if (album != null) {
             String[] projection = {"ID"};
             String[] selectionArgs = {album};
@@ -171,7 +178,6 @@ public class DBBuilder extends SQLiteOpenHelper {
             for (int i = 0; i < albumIdList.size(); i++) {
                 albumId = albumIdList.get(i).toString();
                 String albumArtist = easyShortQuery("Albums", "AlbumArtist", "ID = ?", albumId, null);
-                String songAlbumArtist = item.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST);
                 if (songAlbumArtist == null) {
                     songAlbumArtist = "";
                 }
@@ -185,16 +191,16 @@ public class DBBuilder extends SQLiteOpenHelper {
                 ContentValues albumValues = new ContentValues();
                 albumValues.put("ID", maxAlbumID);
                 albumValues.put("Album", album);
-                albumValues.put("AlbumArtist", item.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST));
-                albumValues.put("TotalTrackCount", item.getLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS));
-                albumValues.put("Duration", item.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+                albumValues.put("AlbumArtist", songAlbumArtist);
+                albumValues.put("TotalTrackCount", trackNumber);
+                albumValues.put("Duration", duration);
                 maxAlbumID++;
                 db.insert("Albums", null, albumValues);
             } else {
                 String oldDuration = easyShortQuery("Albums", "Duration", "ID = ?", albumId, null);
                 long newDuration = -1;
                 if (!oldDuration.equals("")) {
-                    newDuration = Long.parseLong(oldDuration) + item.getLong(MediaMetadataCompat.METADATA_KEY_DURATION);
+                    newDuration = Long.parseLong(oldDuration) + duration;
                 }
 
                 // New value for one column
@@ -212,27 +218,32 @@ public class DBBuilder extends SQLiteOpenHelper {
     }
 
     // Inserts a song into the database
-    private void insertSong(MediaMetadataCompat item) {
-        String title = item.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
-        String year = ""+item.getLong(MediaMetadataCompat.METADATA_KEY_YEAR);
-        String decade = "";
-        if(year != null) {
-            decade = year.substring(0, year.length() - 1) + "0";
-        }
+    private void insertSong(String[] strings, Integer[] nums) {
+        String source = strings[0];
+        String artist = strings[1];
+        String album = strings[2];
+        String albumArtist = strings[3];
+        String genre = strings[4];
+        String title = strings[5];
+        int duration = nums[0];
+        int year = nums[1];
+        int decade = nums[2];
+        int trackNumber = nums[3];
+        int totalTrackCount = nums[4];
 
         ContentValues songValues = new ContentValues();
         songValues.put("ID", maxSongID);
         songValues.put("Title", title);
-        songValues.put("Album", item.getString(MediaMetadataCompat.METADATA_KEY_ALBUM));
-        songValues.put("Artist", item.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
-        songValues.put("AlbumArtist", item.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST));
-        songValues.put("Genre", item.getString(MediaMetadataCompat.METADATA_KEY_GENRE));
+        songValues.put("Album", album);
+        songValues.put("Artist", artist);
+        songValues.put("AlbumArtist", albumArtist);
+        songValues.put("Genre", genre);
         songValues.put("Year", year);
         songValues.put("Decade", decade);
-        songValues.put("Source", item.getString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE));
-        songValues.put("TrackNumber", item.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER));
-        songValues.put("TotalTrackCount", item.getLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS));
-        songValues.put("Duration", item.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+        songValues.put("Source", source);
+        songValues.put("TrackNumber", trackNumber);
+        songValues.put("TotalTrackCount", totalTrackCount);
+        songValues.put("Duration", duration);
         maxSongID++;
 
         db.insert("Songs", null, songValues);
@@ -365,7 +376,7 @@ public class DBBuilder extends SQLiteOpenHelper {
     }
 
     // Gets the maximum IDs of all the items
-    private void getAllMaxIDs() {
+    void getAllMaxIDs() {
         maxSongID = getMaxID("Songs");
         maxArtistID = getMaxID("Artists");
         maxAlbumID = getMaxID("Albums");
