@@ -34,7 +34,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.uamp.R;
-import com.example.android.uamp.utils.MediaIDHelper;
 
 public class MediaItemViewHolder {
 
@@ -135,9 +134,9 @@ public class MediaItemViewHolder {
         // Set state to playable first, then override to playing or paused state if needed
         if (mediaItem.isPlayable()) {
             state = STATE_PLAYABLE;
-            if (MediaIDHelper.isMediaItemPlaying(context, mediaItem)) {
+            //if (MediaIDHelper.isMediaItemPlaying(context, mediaItem)) {
                 state = getStateFromController(context);
-            }
+            //}
         }
 
         return state;

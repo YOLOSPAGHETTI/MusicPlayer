@@ -68,6 +68,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
 
@@ -83,8 +84,8 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
-                android:background="?android:selectableItemBackground"
-                android:layout_weight="1"/>
+                android:visibility="invisible"
+                android:background="?android:selectableItemBackground"/>
 
         </TableRow>
 
@@ -100,6 +101,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
 
         </TableRow>
@@ -116,6 +118,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
 
         </TableRow>
@@ -132,6 +135,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
 
         </TableRow>
@@ -148,6 +152,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
 
         </TableRow>
@@ -164,6 +169,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
 
         </TableRow>
@@ -180,6 +186,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
 
         </TableRow>
@@ -196,6 +203,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
 
         </TableRow>
@@ -212,6 +220,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
 
         </TableRow>
@@ -228,6 +237,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
 
         </TableRow>
@@ -244,6 +254,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
 
         </TableRow>
@@ -260,6 +271,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -274,6 +286,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -288,6 +301,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -302,6 +316,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -316,6 +331,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -330,6 +346,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -344,6 +361,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -358,6 +376,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -372,6 +391,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -386,6 +406,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -400,6 +421,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -414,6 +436,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -428,6 +451,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -442,6 +466,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
         <TableRow
@@ -456,6 +481,7 @@
                 android:textSize="@dimen/letter_size"
                 android:textColor="@color/grey"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:background="?android:selectableItemBackground"/>
         </TableRow>
     </TableLayout>

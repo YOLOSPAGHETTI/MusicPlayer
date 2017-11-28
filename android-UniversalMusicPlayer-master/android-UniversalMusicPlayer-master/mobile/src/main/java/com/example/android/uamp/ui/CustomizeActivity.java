@@ -18,16 +18,22 @@ package com.example.android.uamp.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.LocalBroadcastManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Main activity for the music player.
@@ -40,7 +46,6 @@ public class CustomizeActivity extends BaseActivity {
     private static final String TAG = LogHelper.makeLogTag(CustomizeActivity.class);
 
     private ArrayList<String> sortOrder;
-    private LocalBroadcastManager localBroadcastManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,7 +56,6 @@ public class CustomizeActivity extends BaseActivity {
 
         initializeToolbar();
 
-        localBroadcastManager = LocalBroadcastManager.getInstance(this);
         sortOrder = new ArrayList<>();
 
         final Button button1 = (Button)findViewById(R.id.button1);
@@ -104,26 +108,47 @@ public class CustomizeActivity extends BaseActivity {
                 img.setVisibility(View.INVISIBLE);
                 img=(TextView) findViewById(R.id.img5);
                 img.setVisibility(View.INVISIBLE);
+                EditText text=(EditText) findViewById(R.id.search1);
+                text.setVisibility(View.INVISIBLE);
+                text=(EditText) findViewById(R.id.search2);
+                text.setVisibility(View.INVISIBLE);
+                text=(EditText) findViewById(R.id.search3);
+                text.setVisibility(View.INVISIBLE);
+                text=(EditText) findViewById(R.id.search4);
+                text.setVisibility(View.INVISIBLE);
+                text=(EditText) findViewById(R.id.search5);
+                text.setVisibility(View.INVISIBLE);
+                text=(EditText) findViewById(R.id.search6);
+                text.setVisibility(View.INVISIBLE);
+                text=(EditText) findViewById(R.id.search7);
+                text.setVisibility(View.INVISIBLE);
             }
         });
 
+        final EditText edit1 = (EditText)findViewById(R.id.search5);
+        final EditText edit2 = (EditText)findViewById(R.id.search6);
+        final EditText edit3 = (EditText)findViewById(R.id.search7);
 
         final Button submit_button = (Button)findViewById(R.id.submit_button);
         submit_button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-                navigationView.setCheckedItem(R.id.navigation_allmusic);
-                startActivity(new Intent(CustomizeActivity.this, MusicPlayerActivity.class));
+                ArrayList<String> searchStrings = getSearchStrings(edit1, edit2, edit3);
+                if(searchStrings != null) {
+                    NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+                    navigationView.setCheckedItem(R.id.navigation_allmusic);
+                    Intent intent = new Intent(CustomizeActivity.this, MusicPlayerActivity.class);
 
-                Intent intent = new Intent(MusicService.SORT_ORDER_RESULT);
-                intent.putExtra(MusicService.SORT_ORDER_MESSAGE, sortOrder);
-                localBroadcastManager.sendBroadcast(intent);
-
-                /*Intent intent = new Intent(CustomizeActivity.this, MusicPlayerActivity.class);
-                intent.putExtra("SORT_ORDER", sortOrder);
-                startActivityForResult(intent, 6262);*/
+                    intent.putExtra(MusicService.SORT_ORDER_MESSAGE, sortOrder);
+                    intent.putExtra(MusicService.SEARCH_MESSAGE, searchStrings);
+                    startActivityForResult(intent, 6262);
+                }
+                else {
+                    // Pop-up for date error
+                }
             }
         });
+
+        setDateTextListeners(edit1, edit2);
     }
 
     public void addToSortOrder(String text) {
@@ -132,49 +157,166 @@ public class CustomizeActivity extends BaseActivity {
             sortOrder.remove(text);
             TextView img=getHiddenTextViewFromText(text);
             img.setVisibility(View.INVISIBLE);
+            setEditTextVisibility(text, View.INVISIBLE);
             for(int i=textIndex; i<sortOrder.size(); i++) {
                 img=getHiddenTextViewFromText(sortOrder.get(i));
                 int sortNum = i + 1;
                 img.setText(""+sortNum);
             }
         }
-        else if(text.equals("Decades") && sortOrder.contains("Years")) {
-            int yearIndex = sortOrder.indexOf("Years");
-            sortOrder.add(yearIndex, text);
-             for(int i=yearIndex; i<sortOrder.size(); i++) {
-                 TextView img = getHiddenTextViewFromText(sortOrder.get(i));
-                 int sortNum = i + 1;
-                 img.setText("" + sortNum);
-                 img.setVisibility(View.VISIBLE);
-             }
-        }
         else {
              sortOrder.add(text);
              TextView img=getHiddenTextViewFromText(text);
+             img.setVisibility(View.VISIBLE);
+             setEditTextVisibility(text, View.VISIBLE);
              int sortNum = sortOrder.indexOf(text) + 1;
              img.setText(""+sortNum);
-             img.setVisibility(View.VISIBLE);
         }
+    }
+
+    // Gets all the search strings
+    public ArrayList<String> getSearchStrings(EditText edit5, EditText edit6, EditText edit7) {
+        ArrayList<String> searchStrings = new ArrayList<>();
+        if(edit5.getVisibility() == View.VISIBLE) {
+            String day = edit5.getText().toString();
+            String month = edit6.getText().toString();
+            String year = edit7.getText().toString();
+
+            if(checkValidDate(day, month, year)) {
+                searchStrings.add(sortOrder.indexOf("Date Added"),day+month+year);
+            }
+            else {
+                System.out.println("invalid date");
+                return null;
+            }
+        }
+        EditText edit=(EditText) findViewById(R.id.search1);
+        if(edit.getVisibility() == View.VISIBLE) {
+            String text = edit.getText().toString();
+            searchStrings.add(sortOrder.indexOf("Artists"),text);
+        }
+        edit=(EditText) findViewById(R.id.search2);
+        if(edit.getVisibility() == View.VISIBLE) {
+            String text = edit.getText().toString();
+            searchStrings.add(sortOrder.indexOf("Albums"),text);
+        }
+        edit=(EditText) findViewById(R.id.search3);
+        if(edit.getVisibility() == View.VISIBLE) {
+            String text = edit.getText().toString();
+            searchStrings.add(sortOrder.indexOf("Genres"),text);
+        }
+        edit=(EditText) findViewById(R.id.search4);
+        if(edit.getVisibility() == View.VISIBLE) {
+            String text = edit.getText().toString();
+            searchStrings.add(sortOrder.indexOf("Years"),text);
+        }
+        return searchStrings;
     }
 
     // Gets the handle of the hidden text view from the text of the button
     public TextView getHiddenTextViewFromText(String text) {
         TextView img=null;
-        if(text.equals("Artists")) {
-            img = (TextView) findViewById(R.id.img1);
-        }
-        else if(text.equals("Albums")) {
-            img = (TextView) findViewById(R.id.img2);
-        }
-        else if(text.equals("Genres")) {
-            img = (TextView) findViewById(R.id.img3);
-        }
-        else if(text.equals("Years")) {
-            img = (TextView) findViewById(R.id.img4);
-        }
-        else if(text.equals("Decades")) {
-            img = (TextView) findViewById(R.id.img5);
+        switch (text) {
+            case "Artists":
+                img = (TextView) findViewById(R.id.img1);
+                break;
+            case "Albums":
+                img = (TextView) findViewById(R.id.img2);
+                break;
+            case "Genres":
+                img = (TextView) findViewById(R.id.img3);
+                break;
+            case "Years":
+                img = (TextView) findViewById(R.id.img4);
+                break;
+            case "Date Added":
+                img = (TextView) findViewById(R.id.img5);
+                break;
         }
         return img;
+    }
+
+    // Gets the handle of the hidden text view from the text of the button
+    public void setEditTextVisibility(String text, int visibility) {
+        EditText img=null;
+        switch (text) {
+            case "Artists":
+                img = (EditText) findViewById(R.id.search1);
+                img.setVisibility(visibility);
+                break;
+            case "Albums":
+                img = (EditText) findViewById(R.id.search2);
+                img.setVisibility(visibility);
+                break;
+            case "Genres":
+                img = (EditText) findViewById(R.id.search3);
+                img.setVisibility(visibility);
+                break;
+            case "Years":
+                img = (EditText) findViewById(R.id.search4);
+                img.setVisibility(visibility);
+                break;
+            case "Date Added":
+                img = (EditText) findViewById(R.id.search5);
+                img.setVisibility(visibility);
+                img = (EditText) findViewById(R.id.search6);
+                img.setVisibility(visibility);
+                img = (EditText) findViewById(R.id.search7);
+                img.setVisibility(visibility);
+                break;
+        }
+    }
+
+    private void setDateTextListeners(final EditText edit1, final EditText edit2) {
+        edit1.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {}
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+                if (!s.toString().equals("")) {
+                    if (Integer.parseInt(s.toString()) > 31) {
+                        edit2.setText("31");
+                    }
+                }
+            }
+        });
+        edit2.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {}
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+                if (!s.toString().equals("")) {
+                    if (Integer.parseInt(s.toString()) > 12) {
+                        edit2.setText("12");
+                    }
+                }
+            }
+        });
+    }
+
+    private boolean checkValidDate(String day, String month, String year) {
+        try {
+
+            SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy", Locale.US);
+            sdf.setLenient(false);
+
+            //if not valid, it will throw ParseException
+            Date date = sdf.parse(day+month+year);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

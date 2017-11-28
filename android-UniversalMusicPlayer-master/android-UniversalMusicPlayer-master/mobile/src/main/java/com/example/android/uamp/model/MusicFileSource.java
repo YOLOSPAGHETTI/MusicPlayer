@@ -23,6 +23,7 @@ import com.example.android.uamp.utils.LogHelper;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,8 +51,6 @@ public class MusicFileSource implements MusicProviderSource {
         if (DBB.isEmpty()) {
             populateDBWithMusicFiles();
         }
-        else {
-        }
         populateTracksFromDB();
         //Looper.prepare();
         //DBJob job = new DBJob(DBB);
@@ -71,7 +70,7 @@ public class MusicFileSource implements MusicProviderSource {
             MediaMetadataRetriever mMMDR = new MediaMetadataRetriever();
 
             try {
-                mMMDR.setDataSource(file.getAbsolutePath()); // IllegalStateException
+                mMMDR.setDataSource(file.getAbsolutePath()); // IllegalStateException, Runtime Exception
                 String title = mMMDR.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
                 String album = mMMDR.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
                 String artist = mMMDR.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
@@ -79,11 +78,9 @@ public class MusicFileSource implements MusicProviderSource {
                 String genre = mMMDR.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
                 String yearStr = mMMDR.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR);
                 int year = -1;
-                int decade = -1;
                 if(yearStr != null) {
                     if(yearStr.length() == 4) {
                         year = ignoreInvalidNums(yearStr);
-                        decade = Integer.parseInt(("" + year).substring(0, ("" + year).length() - 1) + "0");
                     }
                 }
                 String source = file.toURI().toString();
@@ -102,6 +99,7 @@ public class MusicFileSource implements MusicProviderSource {
                 int trackNumber = ignoreInvalidNums(mMMDR.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER));
                 int duration = ignoreInvalidNums(mMMDR.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
                 int totalTrackCount = ignoreInvalidNums(mMMDR.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS));
+                String modifiedDate = (new Date(file.lastModified())).toString();
 
                 LogHelper.d(TAG, "Found music track: ", title);
 
@@ -109,7 +107,7 @@ public class MusicFileSource implements MusicProviderSource {
                     genre = "Unknown";
                 }
 
-                DBB.insertFromMetadata(new String[]{source, artist, album, albumArtist, genre, title}, new Integer[]{duration, year, decade, trackNumber, totalTrackCount});
+                DBB.insertFromMetadata(new String[]{source, artist, album, albumArtist, genre, title, modifiedDate}, new Integer[]{duration, year, trackNumber, totalTrackCount});
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -118,8 +116,7 @@ public class MusicFileSource implements MusicProviderSource {
 
     // Grabs all the id3 data from the DB to populate the music tracks
     private void populateTracksFromDB() {
-        ArrayList<MediaMetadataCompat> tracks = new ArrayList<>();
-        String[] projection = {"ID", "Title", "Album", "Artist", "AlbumArtist", "Genre", "Year", "Decade", "Source", "TrackNumber", "TotalTrackCount", "Duration"};
+        String[] projection = {"ID", "Title", "Album", "Artist", "AlbumArtist", "Genre", "Year", "Source", "TrackNumber", "TotalTrackCount", "Duration", "ModifiedDate"};
         String[] selectionArgs = {"%"};
         List[] data = DBB.normalQuery("Songs", projection, "ID like ?", selectionArgs, null, projection.length);
         if(data[0] != null) {
@@ -136,12 +133,11 @@ public class MusicFileSource implements MusicProviderSource {
                     String albumArtist = ignoreNulls(data[4].get(i));
                     String genre = ignoreNulls(data[5].get(i));
                     int year = ignoreInvalidNums(ignoreNulls(data[6].get(i)));
-                    int decade = ignoreInvalidNums(ignoreNulls(data[7].get(i)));
-                    String source = ignoreNulls(data[8].get(i));
-                    int trackNumber = ignoreInvalidNums(ignoreNulls(data[9].get(i)));
-                    int totalTrackCount = ignoreInvalidNums(ignoreNulls(data[10].get(i)));
-                    int duration = ignoreInvalidNums(ignoreNulls(data[11].get(i)));
-
+                    String source = ignoreNulls(data[7].get(i));
+                    int trackNumber = ignoreInvalidNums(ignoreNulls(data[8].get(i)));
+                    int totalTrackCount = ignoreInvalidNums(ignoreNulls(data[9].get(i)));
+                    int duration = ignoreInvalidNums(ignoreNulls(data[10].get(i)));
+                    String modifiedDate = ignoreNulls(data[11].get(i));
 
                     MediaMetadataCompat metadata = new MediaMetadataCompat.Builder()
                             .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, id)
@@ -152,11 +148,11 @@ public class MusicFileSource implements MusicProviderSource {
                             .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
                             .putString(MediaMetadataCompat.METADATA_KEY_GENRE, genre)
                             .putLong(MediaMetadataCompat.METADATA_KEY_YEAR, year)
-                            .putLong(MusicProviderSource.CUSTOM_METADATA_TRACK_DECADE, decade)
                             //.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap)
                             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
                             .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, trackNumber)
                             .putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, totalTrackCount)
+                            .putString(MusicProviderSource.CUSTOM_METADATA_TRACK_DATE_ADDED, modifiedDate)
                             .build();
 
                     tracks.add(metadata);
@@ -198,7 +194,7 @@ public class MusicFileSource implements MusicProviderSource {
     private void getAllMusicFiles() {
         //File root = new File("/");
         //File storage = new File("/storage");
-        File storage = new File("/storage/0000-0000/Music/Downloads/Download 48");
+        File storage = new File("/storage/0000-0000/Music/Downloads/Download 45");
 
         //File[] allRootFolders = root.listFiles();
         File[] allStorageFolders = storage.listFiles();

@@ -162,11 +162,12 @@ public class MusicService extends MediaBrowserServiceCompat implements
     private LocalBroadcastManager localBroadcastManager;
     public static final String COMP_PERC_RESULT = "completion perc result";
     public static final String COMP_PERC_MESSAGE = "completion perc message";
-    public static String SORT_ORDER_RESULT = "sort order result";
+    public static String CUSTOMIZE_RESULT = "customize result";
     public static String SORT_ORDER_MESSAGE = "sort order message";
+    public static String SEARCH_MESSAGE = "search message";
     private Timer timer;
-    private BroadcastReceiver customizeConnection;
-    private ArrayList sortOrder;
+    private ArrayList<String> sortOrder;
+    private ArrayList<String> searchStrings;
 
     /*
      * (non-Javadoc)
@@ -184,20 +185,21 @@ public class MusicService extends MediaBrowserServiceCompat implements
 
 
         final DBBuilder DBB = new DBBuilder(getApplicationContext());
-        mMusicProvider = new MusicProvider(DBB, null);
+        mMusicProvider = new MusicProvider(DBB);
 
         runProgressTimer();
 
-        customizeConnection = new BroadcastReceiver() {
+        BroadcastReceiver customizeConnection = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 sortOrder = intent.getStringArrayListExtra(SORT_ORDER_MESSAGE);
-                mMusicProvider = new MusicProvider(DBB, sortOrder);
+                searchStrings = intent.getStringArrayListExtra(SEARCH_MESSAGE);
+                mMusicProvider.customize(sortOrder, searchStrings);
             }
         };
 
         LocalBroadcastManager.getInstance(this).registerReceiver((customizeConnection),
-                new IntentFilter(SORT_ORDER_RESULT));
+                new IntentFilter(CUSTOMIZE_RESULT));
 
 
         // To make the app more responsive, fetch and cache catalog information now.
@@ -368,16 +370,16 @@ public class MusicService extends MediaBrowserServiceCompat implements
             result.sendResult(new ArrayList<MediaItem>());
         } else if (mMusicProvider.isInitialized()) {
             // if music library is ready, return immediately
-            //result.sendResult(mMusicProvider.getChildren(parentMediaId, getResources()));
+            result.sendResult(mMusicProvider.getChildren(parentMediaId, getResources()));
         } else {
             // otherwise, only return results when the music library is retrieved
             result.detach();
-            /*mMusicProvider.retrieveMediaAsync(new MusicProvider.Callback() {
+            mMusicProvider.retrieveMediaAsync(new MusicProvider.Callback() {
                 @Override
                 public void onMusicCatalogReady(boolean success) {
                     result.sendResult(mMusicProvider.getChildren(parentMediaId, getResources()));
                 }
-            });*/
+            });
         }
     }
 

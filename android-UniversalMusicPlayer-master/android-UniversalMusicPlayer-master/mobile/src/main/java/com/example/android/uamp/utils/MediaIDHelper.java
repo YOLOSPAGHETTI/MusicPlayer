@@ -16,9 +16,8 @@
 
 package com.example.android.uamp.utils;
 
-import android.content.Context;
+import android.app.Activity;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.text.TextUtils;
@@ -33,15 +32,17 @@ public class MediaIDHelper {
     // Media IDs used on browseable items of MediaBrowser
     public static final String MEDIA_ID_EMPTY_ROOT = "__EMPTY_ROOT__";
     public static final String MEDIA_ID_ROOT = "__ROOT__";
-	public static final String MEDIA_ID_MUSICS_BY_SONG = "__BY_SONG__";
-	public static final String MEDIA_ID_MUSICS_BY_ARTIST = "__BY_ARTIST__";
-	public static final String MEDIA_ID_MUSICS_BY_ALBUM = "__BY_ALBUM__";
-    public static final String MEDIA_ID_MUSICS_BY_GENRE = "__BY_GENRE__";
-	public static final String MEDIA_ID_MUSICS_BY_YEAR = "__BY_YEAR__";
-	public static final String MEDIA_ID_MUSICS_BY_DECADE = "__BY_DECADE__";
     public static final String MEDIA_ID_MUSICS_BY_SEARCH = "__BY_SEARCH__";
 
-    private static final char CATEGORY_SEPARATOR = '/';
+    public static final String MEDIA_ID_MUSICS_BY_SONG = "__BY_SONG__";
+    public static final String MEDIA_ID_MUSICS_BY_ARTIST = "__BY_ARTIST__";
+    public static final String MEDIA_ID_MUSICS_BY_ALBUM = "__BY_ALBUM_";
+	public static final String MEDIA_ID_MUSICS_BY_GENRE = "__BY_GENRE__";
+    public static final String MEDIA_ID_MUSICS_BY_YEAR = "__BY_YEAR__";
+    public static final String MEDIA_ID_MUSICS_BY_DATE = "__BY_DATE__";
+    public static final String MEDIA_ID_MUSICS_CUSTOM = "__CUSTOM__";
+
+    private static final char CATEGORY_SEPARATOR = '`';
     private static final char LEAF_SEPARATOR = '|';
 
     /**
@@ -55,7 +56,6 @@ public class MediaIDHelper {
      * can correctly build the playing queue. This is specially useful when
      * one music can appear in more than one list, like "by genre -> genre_1"
      * and "by artist -> artist_1".
-
      * @param musicID Unique music ID for playable items, or null for browseable items.
      * @param categories hierarchy of categories representing this item's browsing parents
      * @return a hierarchy-aware media ID
@@ -65,8 +65,8 @@ public class MediaIDHelper {
         if (categories != null) {
             for (int i=0; i < categories.length; i++) {
                 if (!isValidCategory(categories[i])) {
-                    categories[i] = categories[i].replace(CATEGORY_SEPARATOR, ' ');
-                    categories[i] = categories[i].replace(LEAF_SEPARATOR, ' ');
+                    categories[i].replace(CATEGORY_SEPARATOR, ' ');
+                    categories[i].replace(LEAF_SEPARATOR, ' ');
                     //throw new IllegalArgumentException("Invalid category: " + categories[i]);
                 }
                 sb.append(categories[i]);
@@ -84,8 +84,8 @@ public class MediaIDHelper {
     private static boolean isValidCategory(String category) {
         return category == null ||
                 (
-                    category.indexOf(CATEGORY_SEPARATOR) < 0 &&
-                    category.indexOf(LEAF_SEPARATOR) < 0
+                        category.indexOf(CATEGORY_SEPARATOR) < 0 &&
+                                category.indexOf(LEAF_SEPARATOR) < 0
                 );
     }
 
@@ -153,12 +153,10 @@ public class MediaIDHelper {
      * @param mediaItem to compare to currently playing {@link MediaBrowserCompat.MediaItem}
      * @return boolean indicating whether media item matches currently playing media item
      */
-    public static boolean isMediaItemPlaying(Context context,
-                                             MediaBrowserCompat.MediaItem mediaItem) {
+    public static boolean isMediaItemPlaying(Activity context, MediaBrowserCompat.MediaItem mediaItem) {
         // Media item is considered to be playing or paused based on the controller's current
         // media id
-        MediaControllerCompat controller = ((FragmentActivity) context)
-                .getSupportMediaController();
+        MediaControllerCompat controller = MediaControllerCompat.getMediaController(context);
         if (controller != null && controller.getMetadata() != null) {
             String currentPlayingMediaId = controller.getMetadata().getDescription()
                     .getMediaId();

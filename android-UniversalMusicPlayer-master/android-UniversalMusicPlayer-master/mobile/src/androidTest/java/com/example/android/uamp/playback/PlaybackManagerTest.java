@@ -25,7 +25,6 @@ import android.test.mock.MockResources;
 
 import com.example.android.uamp.TestSetupHelper;
 import com.example.android.uamp.model.MusicProvider;
-import com.example.android.uamp.utils.MediaIDHelper;
 import com.example.android.uamp.utils.SimpleMusicProviderSource;
 
 import org.junit.Before;

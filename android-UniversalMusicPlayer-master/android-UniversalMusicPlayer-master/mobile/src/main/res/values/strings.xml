@@ -24,13 +24,15 @@
     <string name="browse_albums">Albums</string>
     <string name="browse_genres">Genres</string>
     <string name="browse_years">Years</string>
-	<string name="browse_decades">Decades</string>
+    <string name="browse_dates">Date Added</string>
+    <string name="browse_custom">Custom</string>
 	<string name="browse_song_subtitle">Songs</string>
 	<string name="browse_artist_subtitle">Songs by Artist</string>
 	<string name="browse_album_subtitle">Songs by Album</string>
 	<string name="browse_genre_subtitle">Songs by Genre</string>
 	<string name="browse_year_subtitle">Songs by Year</string>
-	<string name="browse_decade_subtitle">Songs by Decade</string>
+	<string name="browse_date_subtitle">Songs by Date Added</string>
+    <string name="browse_custom_subtitle">Custom</string>
     <string name="browse_musics_by_genre_subtitle">%1$s songs</string>
     <string name="random_queue_title">Random music</string>
     <string name="error_no_connection">Cannot connect to server. Please, check your Internet connectivity.</string>
@@ -75,9 +77,13 @@
     <string name="sort_option2">Albums</string>
     <string name="sort_option3">Genres</string>
     <string name="sort_option4">Years</string>
-    <string name="sort_option5">Decades</string>
+    <string name="sort_option5">Date Added</string>
     <string name="clear">Clear</string>
     <string name="submit">Submit</string>
+    <string name="search">Search</string>
+    <string name="month">MM</string>
+    <string name="day">dd</string>
+    <string name="year">yyyy</string>
     <string name="progress_bar">
         Loading in music, please wait. This may take a few minutes the first time, but will be a lot faster every other time.
     </string>

@@ -30,22 +30,6 @@
 
         <include layout="@layout/include_toolbar" android:id="@+id/toolbar_container"/>
 
-        <android.support.v7.widget.CardView
-            android:id="@+id/controls_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            app:cardElevation="8dp">
-
-            <fragment android:name="com.example.android.uamp.ui.PlaybackControlsFragment"
-                android:id="@+id/fragment_playback_controls"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                tools:layout="@layout/fragment_playback_controls" />
-
-        </android.support.v7.widget.CardView>
-
         <FrameLayout
             android:id="@+id/container"
             android:layout_width="match_parent"
@@ -59,14 +43,17 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top|center_horizontal"
             android:layout_below="@+id/toolbar_container"
-            android:text="@string/sort_instructions"/>
+            android:layout_marginTop="15dp"
+            android:text="@string/sort_instructions"
+            android:visibility="invisible"/>
 
         <Button
             android:id="@+id/clear_button"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_centerInParent="true"
-            android:layout_below="@+id/sort_instructions"
+            android:layout_below="@+id/toolbar_container"
+            android:layout_marginTop="15dp"
             android:text="@string/clear" />
 
         <Button
@@ -74,12 +61,15 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_centerInParent="true"
+            android:layout_above="@+id/controls_container"
+            android:layout_marginBottom="15dp"
             android:text="@string/submit" />
+
 
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/controls_container" >
+            android:layout_centerInParent="true">
 
             <TableRow
                 android:id="@+id/tableRow1"
@@ -99,6 +89,14 @@
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:text="@string/sort_option1" />
+
+                <EditText
+                    android:id="@+id/search1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="invisible"
+                    android:maxLength="22"
+                    android:hint="@string/search"/>
 
             </TableRow>
 
@@ -121,6 +119,14 @@
                     android:layout_width="wrap_content"
                     android:text="@string/sort_option2" />
 
+                <EditText
+                    android:id="@+id/search2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="invisible"
+                    android:maxLength="22"
+                    android:hint="@string/search"/>
+
             </TableRow>
 
             <TableRow
@@ -141,6 +147,14 @@
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:text="@string/sort_option3" />
+
+                <EditText
+                    android:id="@+id/search3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="invisible"
+                    android:maxLength="22"
+                    android:hint="@string/search"/>
 
             </TableRow>
 
@@ -163,6 +177,15 @@
                     android:layout_width="wrap_content"
                     android:text="@string/sort_option4" />
 
+                <EditText
+                    android:id="@+id/search4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="invisible"
+                    android:inputType="number"
+                    android:maxLength="4"
+                    android:hint="@string/year"/>
+
             </TableRow>
 
             <TableRow
@@ -184,9 +207,58 @@
                     android:layout_width="wrap_content"
                     android:text="@string/sort_option5" />
 
+                <RelativeLayout>
+                    <EditText
+                        android:id="@+id/search5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="invisible"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:hint="@string/day"/>
+
+                    <EditText
+                        android:id="@+id/search6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="invisible"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:layout_toEndOf="@+id/search5"
+                        android:layout_marginLeft="5dp"
+                        android:hint="@string/month"/>
+
+                    <EditText
+                        android:id="@+id/search7"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="invisible"
+                        android:inputType="number"
+                        android:maxLength="4"
+                        android:layout_toEndOf="@+id/search6"
+                        android:layout_marginLeft="5dp"
+                        android:hint="@string/year"/>
+                </RelativeLayout>
+
             </TableRow>
 
         </TableLayout>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/controls_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            app:cardElevation="8dp">
+
+            <fragment android:name="com.example.android.uamp.ui.PlaybackControlsFragment"
+                      android:id="@+id/fragment_playback_controls"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_alignParentBottom="true"
+                      tools:layout="@layout/fragment_playback_controls" />
+
+        </android.support.v7.widget.CardView>
 
     </RelativeLayout>
 

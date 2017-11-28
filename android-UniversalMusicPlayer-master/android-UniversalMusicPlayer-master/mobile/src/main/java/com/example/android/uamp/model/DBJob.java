@@ -102,12 +102,12 @@ public class DBJob extends JobService {
     }
 
     private synchronized void updateMedia() {
-        mSource = new MusicFileSource(null, DBB);
+        mSource = new MusicFileSource(DBB);
 
         Iterator<MediaMetadataCompat> tracks = mSource.iterator();
         while (tracks.hasNext()) {
             MediaMetadataCompat item = tracks.next();
-            DBB.insertFromMetadata(item);
+            //DBB.insertFromMetadata(item);
             //DBB.printColumn("Title");
         }
     }

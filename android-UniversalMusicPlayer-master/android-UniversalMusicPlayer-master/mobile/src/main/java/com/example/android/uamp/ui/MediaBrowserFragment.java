@@ -165,7 +165,14 @@ public class MediaBrowserFragment extends Fragment {
                 mMediaFragmentListener.onMediaItemSelected(item);
             }
         });
-
+		
+        if(getMediaId() == null) {
+            setAlphabetVisibility(rootView, View.INVISIBLE);
+        }
+        else {
+            setAlphabetVisibility(rootView, View.VISIBLE);
+        }
+		
         setAlphabetButtonListeners(rootView);
 
         return rootView;
@@ -324,89 +331,178 @@ public class MediaBrowserFragment extends Fragment {
         void setToolbarTitle(CharSequence title);
     }
 
+    private void setAlphabetVisibility(View view, int visibility) {
+        final ListView listView = (ListView) view.findViewById(R.id.list_view);
+
+        final Button buttonNum = (Button)view.findViewById(R.id.letterNum);
+        if(buttonNum.getVisibility() != visibility) {
+            buttonNum.setVisibility(visibility);
+
+            final Button buttonA = (Button) view.findViewById(R.id.letterA);
+            buttonA.setVisibility(visibility);
+
+            final Button buttonB = (Button) view.findViewById(R.id.letterB);
+            buttonB.setVisibility(visibility);
+
+            final Button buttonC = (Button) view.findViewById(R.id.letterC);
+            buttonC.setVisibility(visibility);
+
+            final Button buttonD = (Button) view.findViewById(R.id.letterD);
+            buttonD.setVisibility(visibility);
+
+            final Button buttonE = (Button) view.findViewById(R.id.letterE);
+            buttonE.setVisibility(visibility);
+
+            final Button buttonF = (Button) view.findViewById(R.id.letterF);
+            buttonF.setVisibility(visibility);
+
+            final Button buttonG = (Button) view.findViewById(R.id.letterG);
+            buttonG.setVisibility(visibility);
+
+            final Button buttonH = (Button) view.findViewById(R.id.letterH);
+            buttonH.setVisibility(visibility);
+
+            final Button buttonI = (Button) view.findViewById(R.id.letterI);
+            buttonI.setVisibility(visibility);
+
+            final Button buttonJ = (Button) view.findViewById(R.id.letterJ);
+            buttonJ.setVisibility(visibility);
+
+            final Button buttonK = (Button) view.findViewById(R.id.letterK);
+            buttonK.setVisibility(visibility);
+
+            final Button buttonL = (Button) view.findViewById(R.id.letterL);
+            buttonL.setVisibility(visibility);
+
+            final Button buttonM = (Button) view.findViewById(R.id.letterM);
+            buttonM.setVisibility(visibility);
+
+            final Button buttonN = (Button) view.findViewById(R.id.letterN);
+            buttonN.setVisibility(visibility);
+
+            final Button buttonO = (Button) view.findViewById(R.id.letterO);
+            buttonO.setVisibility(visibility);
+
+            final Button buttonP = (Button) view.findViewById(R.id.letterP);
+            buttonP.setVisibility(visibility);
+
+            final Button buttonQ = (Button) view.findViewById(R.id.letterQ);
+            buttonQ.setVisibility(visibility);
+
+            final Button buttonR = (Button) view.findViewById(R.id.letterR);
+            buttonR.setVisibility(visibility);
+
+            final Button buttonS = (Button) view.findViewById(R.id.letterS);
+            buttonS.setVisibility(visibility);
+
+            final Button buttonT = (Button) view.findViewById(R.id.letterT);
+            buttonT.setVisibility(visibility);
+
+            final Button buttonU = (Button) view.findViewById(R.id.letterU);
+            buttonU.setVisibility(visibility);
+
+            final Button buttonV = (Button) view.findViewById(R.id.letterV);
+            buttonV.setVisibility(visibility);
+
+            final Button buttonW = (Button) view.findViewById(R.id.letterW);
+            buttonW.setVisibility(visibility);
+
+            final Button buttonX = (Button) view.findViewById(R.id.letterX);
+            buttonX.setVisibility(visibility);
+
+            final Button buttonY = (Button) view.findViewById(R.id.letterY);
+            buttonY.setVisibility(visibility);
+
+            final Button buttonZ = (Button) view.findViewById(R.id.letterZ);
+            buttonZ.setVisibility(visibility);
+        }
+    }
+
     private void setAlphabetButtonListeners(View view) {
         final ListView listView = (ListView) view.findViewById(R.id.list_view);
 
         final Button buttonNum = (Button)view.findViewById(R.id.letterNum);
-        setButtonListener(buttonNum, ' ', listView);
+		if(buttonNum.getVisibility() == View.VISIBLE) {
+            setButtonListener(buttonNum, ' ', listView);
 
-        final Button buttonA = (Button)view.findViewById(R.id.letterA);
-        setButtonListener(buttonA, 'A', listView);
+            final Button buttonA = (Button) view.findViewById(R.id.letterA);
+            setButtonListener(buttonA, 'A', listView);
 
-        final Button buttonB = (Button)view.findViewById(R.id.letterB);
-        setButtonListener(buttonB, 'B', listView);
+            final Button buttonB = (Button) view.findViewById(R.id.letterB);
+            setButtonListener(buttonB, 'B', listView);
 
-        final Button buttonC = (Button)view.findViewById(R.id.letterC);
-        setButtonListener(buttonC, 'C', listView);
+            final Button buttonC = (Button) view.findViewById(R.id.letterC);
+            setButtonListener(buttonC, 'C', listView);
 
-        final Button buttonD = (Button)view.findViewById(R.id.letterD);
-        setButtonListener(buttonD, 'D', listView);
+            final Button buttonD = (Button) view.findViewById(R.id.letterD);
+            setButtonListener(buttonD, 'D', listView);
 
-        final Button buttonE = (Button)view.findViewById(R.id.letterE);
-        setButtonListener(buttonE, 'E', listView);
+            final Button buttonE = (Button) view.findViewById(R.id.letterE);
+            setButtonListener(buttonE, 'E', listView);
 
-        final Button buttonF = (Button)view.findViewById(R.id.letterF);
-        setButtonListener(buttonF, 'F', listView);
+            final Button buttonF = (Button) view.findViewById(R.id.letterF);
+            setButtonListener(buttonF, 'F', listView);
 
-        final Button buttonG = (Button)view.findViewById(R.id.letterG);
-        setButtonListener(buttonG, 'G', listView);
+            final Button buttonG = (Button) view.findViewById(R.id.letterG);
+            setButtonListener(buttonG, 'G', listView);
 
-        final Button buttonH = (Button)view.findViewById(R.id.letterH);
-        setButtonListener(buttonH, 'H', listView);
+            final Button buttonH = (Button) view.findViewById(R.id.letterH);
+            setButtonListener(buttonH, 'H', listView);
 
-        final Button buttonI = (Button)view.findViewById(R.id.letterI);
-        setButtonListener(buttonI, 'I', listView);
+            final Button buttonI = (Button) view.findViewById(R.id.letterI);
+            setButtonListener(buttonI, 'I', listView);
 
-        final Button buttonJ = (Button)view.findViewById(R.id.letterJ);
-        setButtonListener(buttonJ, 'J', listView);
+            final Button buttonJ = (Button) view.findViewById(R.id.letterJ);
+            setButtonListener(buttonJ, 'J', listView);
 
-        final Button buttonK = (Button)view.findViewById(R.id.letterK);
-        setButtonListener(buttonK, 'K', listView);
+            final Button buttonK = (Button) view.findViewById(R.id.letterK);
+            setButtonListener(buttonK, 'K', listView);
 
-        final Button buttonL = (Button)view.findViewById(R.id.letterL);
-        setButtonListener(buttonL, 'L', listView);
+            final Button buttonL = (Button) view.findViewById(R.id.letterL);
+            setButtonListener(buttonL, 'L', listView);
 
-        final Button buttonM = (Button)view.findViewById(R.id.letterM);
-        setButtonListener(buttonM, 'M', listView);
+            final Button buttonM = (Button) view.findViewById(R.id.letterM);
+            setButtonListener(buttonM, 'M', listView);
 
-        final Button buttonN = (Button)view.findViewById(R.id.letterN);
-        setButtonListener(buttonN, 'N', listView);
+            final Button buttonN = (Button) view.findViewById(R.id.letterN);
+            setButtonListener(buttonN, 'N', listView);
 
-        final Button buttonO = (Button)view.findViewById(R.id.letterO);
-        setButtonListener(buttonO, 'O', listView);
+            final Button buttonO = (Button) view.findViewById(R.id.letterO);
+            setButtonListener(buttonO, 'O', listView);
 
-        final Button buttonP = (Button)view.findViewById(R.id.letterP);
-        setButtonListener(buttonP, 'P', listView);
+            final Button buttonP = (Button) view.findViewById(R.id.letterP);
+            setButtonListener(buttonP, 'P', listView);
 
-        final Button buttonQ = (Button)view.findViewById(R.id.letterQ);
-        setButtonListener(buttonQ, 'Q', listView);
+            final Button buttonQ = (Button) view.findViewById(R.id.letterQ);
+            setButtonListener(buttonQ, 'Q', listView);
 
-        final Button buttonR = (Button)view.findViewById(R.id.letterR);
-        setButtonListener(buttonR, 'R', listView);
+            final Button buttonR = (Button) view.findViewById(R.id.letterR);
+            setButtonListener(buttonR, 'R', listView);
 
-        final Button buttonS = (Button)view.findViewById(R.id.letterS);
-        setButtonListener(buttonS, 'S', listView);
+            final Button buttonS = (Button) view.findViewById(R.id.letterS);
+            setButtonListener(buttonS, 'S', listView);
 
-        final Button buttonT = (Button)view.findViewById(R.id.letterT);
-        setButtonListener(buttonT, 'T', listView);
+            final Button buttonT = (Button) view.findViewById(R.id.letterT);
+            setButtonListener(buttonT, 'T', listView);
 
-        final Button buttonU = (Button)view.findViewById(R.id.letterU);
-        setButtonListener(buttonU, 'U', listView);
+            final Button buttonU = (Button) view.findViewById(R.id.letterU);
+            setButtonListener(buttonU, 'U', listView);
 
-        final Button buttonV = (Button)view.findViewById(R.id.letterV);
-        setButtonListener(buttonV, 'V', listView);
+            final Button buttonV = (Button) view.findViewById(R.id.letterV);
+            setButtonListener(buttonV, 'V', listView);
 
-        final Button buttonW = (Button)view.findViewById(R.id.letterW);
-        setButtonListener(buttonW, 'W', listView);
+            final Button buttonW = (Button) view.findViewById(R.id.letterW);
+            setButtonListener(buttonW, 'W', listView);
 
-        final Button buttonX = (Button)view.findViewById(R.id.letterX);
-        setButtonListener(buttonX, 'X', listView);
+            final Button buttonX = (Button) view.findViewById(R.id.letterX);
+            setButtonListener(buttonX, 'X', listView);
 
-        final Button buttonY = (Button)view.findViewById(R.id.letterY);
-        setButtonListener(buttonY, 'Y', listView);
+            final Button buttonY = (Button) view.findViewById(R.id.letterY);
+            setButtonListener(buttonY, 'Y', listView);
 
-        final Button buttonZ = (Button)view.findViewById(R.id.letterZ);
-        setButtonListener(buttonZ, 'Z', listView);
+            final Button buttonZ = (Button) view.findViewById(R.id.letterZ);
+            setButtonListener(buttonZ, 'Z', listView);
+        }
     }
 
     private void setButtonListener(final Button button, final char letter, final ListView listView) {

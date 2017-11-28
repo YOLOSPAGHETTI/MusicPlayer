@@ -199,7 +199,6 @@ public final class LocalPlayback implements Playback {
                                     item.getDescription().getMediaId()));
 
             String source = track.getString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE);
-			System.out.println(source);
             if (source != null) {
                 source = source.replaceAll(" ", "%20"); // Escape spaces for URLs
             }

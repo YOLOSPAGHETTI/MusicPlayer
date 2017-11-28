@@ -6,8 +6,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Kyler C on 10/26/2017.
@@ -15,7 +19,7 @@ import java.util.List;
 
 public class DBBuilder extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "SongInfo.db";
     private SQLiteDatabase db;
     private ArrayList<Long> validSongRows = new ArrayList<Long>();
@@ -34,6 +38,7 @@ public class DBBuilder extends SQLiteOpenHelper {
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         this.db = db;
+        deleteTables();
         createTables();
     }
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -48,59 +53,80 @@ public class DBBuilder extends SQLiteOpenHelper {
         maxGenreID = 0;
         maxPlaylistID = 0;
         String SQL_CREATE_SONGS = "CREATE TABLE Songs (" +
-                "    ID Number(20)," +
-                "    Title Varchar2(60)," +
-                "    Album Varchar2(60)," +
-                "    Artist Varchar2(60)," +
-                "    AlbumArtist Varchar2(60)," +
-                "    Genre Varchar2(30)," +
-                "    Year Number(4)," +
-                "    Decade Number(4)," +
-                "    Source Varchar2(2000)," +
-                "    TrackNumber Number(2)," +
-                "    TotalTrackCount Number(2)," +
-                "    Duration Number(6)," +
+                "    ID Integer(20)," +
+                "    Title Text(60)," +
+                "    Album Text(60)," +
+                "    Artist Text(60)," +
+                "    AlbumArtist Text(60)," +
+                "    Genre Text(30)," +
+                "    Year Integer(4)," +
+                "    Source Text(2000)," +
+                "    TrackNumber Integer(2)," +
+                "    TotalTrackCount Integer(2)," +
+                "    Duration Integer(6)," +
+                "    ModifiedDate Text" +
                 ");";
         db.execSQL(SQL_CREATE_SONGS);
         String SQL_CREATE_ARTISTS = "CREATE TABLE Artists (" +
-                "    ID Number(20)," +
-                "    Artist Varchar2(60)," +
+                "    ID Integer(20)," +
+                "    Artist Text(60)" +
                 ");";
         db.execSQL(SQL_CREATE_ARTISTS);
         String SQL_CREATE_ALBUMS = "CREATE TABLE Albums (" +
-                "    ID Number(20)," +
-                "    Album Varchar2(60)," +
-                "    AlbumArtist Varchar2(60)," +
-                "    TotalTrackCount Number(2)," +
-                "    Duration Number(10)," +
+                "    ID Integer(20)," +
+                "    Album Text(60)," +
+                "    AlbumArtist Text(60)," +
+                "    TotalTrackCount Integer(2)," +
+                "    Duration Integer(10)" +
                 ");";
         db.execSQL(SQL_CREATE_ALBUMS);
         String SQL_CREATE_GENRES = "CREATE TABLE Genres (" +
-                "    ID Number(20)," +
-                "    Genre Varchar2(30)" +
+                "    ID Integer(20)," +
+                "    Genre Text(30)" +
                 ");";
         db.execSQL(SQL_CREATE_GENRES);
         String SQL_CREATE_PLAYLISTS = "CREATE TABLE Playlists (" +
-                "    ID Number(20)," +
-                "    Playlist Varchar2(60)" +
+                "    ID Integer(20)," +
+                "    Playlist Text(60)" +
                 ");";
         db.execSQL(SQL_CREATE_PLAYLISTS);
         String SQL_CREATE_PLAYLIST_SONGS = "CREATE TABLE PlaylistSongs (" +
-                "    SongID Number(20)," +
-                "    PlaylistID Number(20)" +
+                "    SongID Integer(20)," +
+                "    PlaylistID Integer(20)" +
                 ");";
         db.execSQL(SQL_CREATE_PLAYLIST_SONGS);
         String SQL_CREATE_SONG_ARTISTS = "CREATE TABLE SongArtists (" +
-                "    SongID Number(20)," +
-                "    ArtistID Number(20)" +
+                "    SongID Integer(20)," +
+                "    ArtistID Integer(20)" +
                 ");";
         db.execSQL(SQL_CREATE_SONG_ARTISTS);
         String SQL_CREATE_SONG_GENRES = "CREATE TABLE SongGenres (" +
-                "    SongID Number(20)," +
-                "    GenreID Number(20)" +
+                "    SongID Integer(20)," +
+                "    GenreID Integer(20)" +
                 ");";
         db.execSQL(SQL_CREATE_SONG_GENRES);
     }
+
+    // Deletes all tables in the DB at upgrade
+    private void deleteTables() {
+        String SQL_DELETE_SONGS = "DROP TABLE SONGS;";
+        db.execSQL(SQL_DELETE_SONGS);
+        String SQL_DELETE_ARTISTS = "DROP TABLE Artists;";
+        db.execSQL(SQL_DELETE_ARTISTS);
+        String SQL_DELETE_ALBUMS = "DROP TABLE Albums;";
+        db.execSQL(SQL_DELETE_ALBUMS);
+        String SQL_DELETE_GENRES = "DROP TABLE Genres;";
+        db.execSQL(SQL_DELETE_GENRES);
+        String SQL_DELETE_PLAYLISTS = "DROP TABLE Playlists;";
+        db.execSQL(SQL_DELETE_PLAYLISTS);
+        String SQL_DELETE_PLAYLIST_SONGS = "DROP TABLE PlaylistSongs;";
+        db.execSQL(SQL_DELETE_PLAYLIST_SONGS);
+        String SQL_DELETE_SONG_ARTISTS = "DROP TABLE SongArtists;";
+        db.execSQL(SQL_DELETE_SONG_ARTISTS);
+        String SQL_DELETE_SONG_GENRES = "DROP TABLE SongGenres;";
+        db.execSQL(SQL_DELETE_SONG_GENRES);
+    }
+
 
     void insertFromMetadata(String[] strings, Integer[] nums) {
 
@@ -225,11 +251,19 @@ public class DBBuilder extends SQLiteOpenHelper {
         String albumArtist = strings[3];
         String genre = strings[4];
         String title = strings[5];
+        String modifiedDate = strings[6];
+        String newDateStr = "";
+        try {
+            Date date = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.US).parse(modifiedDate);
+            newDateStr = new SimpleDateFormat("dd-MM-yyyy", Locale.US).format(date);
+        }
+        catch(ParseException e) {
+            e.printStackTrace();
+        }
         int duration = nums[0];
         int year = nums[1];
-        int decade = nums[2];
-        int trackNumber = nums[3];
-        int totalTrackCount = nums[4];
+        int trackNumber = nums[2];
+        int totalTrackCount = nums[3];
 
         ContentValues songValues = new ContentValues();
         songValues.put("ID", maxSongID);
@@ -239,11 +273,11 @@ public class DBBuilder extends SQLiteOpenHelper {
         songValues.put("AlbumArtist", albumArtist);
         songValues.put("Genre", genre);
         songValues.put("Year", year);
-        songValues.put("Decade", decade);
         songValues.put("Source", source);
         songValues.put("TrackNumber", trackNumber);
         songValues.put("TotalTrackCount", totalTrackCount);
         songValues.put("Duration", duration);
+        songValues.put("ModifiedDate", newDateStr);
         maxSongID++;
 
         db.insert("Songs", null, songValues);
@@ -270,7 +304,7 @@ public class DBBuilder extends SQLiteOpenHelper {
     }
 
     // Runs short single selection/projection query
-    private String easyShortQuery(String table, String projection, String selection, String selectionArgs, String sortOrder) {
+    String easyShortQuery(String table, String projection, String selection, String selectionArgs, String sortOrder) {
         String[] shortProjection = {projection};
         String[] shortSelectionArgs = {selectionArgs};
         List list = easyQuery(table, shortProjection, selection, shortSelectionArgs, sortOrder);
@@ -280,7 +314,6 @@ public class DBBuilder extends SQLiteOpenHelper {
                 value = list.get(0).toString();
             }
         }
-
         return value;
     }
 
@@ -339,6 +372,32 @@ public class DBBuilder extends SQLiteOpenHelper {
         return allData;
     }
 
+    // Runs query to grab all columns
+    List[] customQuery(String query, String[] selectionArgs, int columns) {
+        db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                query,
+                selectionArgs
+        );
+
+        List[] allData = new List[columns];
+        boolean newArray = true;
+        while (cursor.moveToNext()) {
+            for(int i=0; i<columns; i++) {
+                if(newArray) {
+                    allData[i] = new ArrayList<>();
+                }
+                String itemId = cursor.getString(i);
+                //System.out.println(itemId);
+                allData[i].add(itemId);
+            }
+            newArray = false;
+        }
+        cursor.close();
+        return allData;
+    }
+
     // Runs short single selection/projection query
     private int easyShortUpdate(String table, ContentValues values, String selection, String selectionArgs) {
         db = this.getWritableDatabase();
@@ -371,7 +430,7 @@ public class DBBuilder extends SQLiteOpenHelper {
                 max = Integer.parseInt(maxStr);
             }
         }
-        System.out.println(table + "     " + max);
+        //System.out.println(table + "     " + max);
         return max;
     }
 
@@ -383,7 +442,6 @@ public class DBBuilder extends SQLiteOpenHelper {
         maxGenreID = getMaxID("Genres");
         maxPlaylistID = getMaxID("Playlists");
     }
-
 
     public boolean isEmpty() {
         db = this.getReadableDatabase();

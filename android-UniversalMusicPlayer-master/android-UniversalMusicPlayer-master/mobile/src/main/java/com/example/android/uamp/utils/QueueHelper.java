@@ -17,7 +17,9 @@
 package com.example.android.uamp.utils;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -30,12 +32,14 @@ import com.example.android.uamp.model.MusicProvider;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_SONG;
-import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_ARTIST;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_ALBUM;
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_ARTIST;
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_DATE;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_GENRE;
-import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_YEAR;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_SEARCH;
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_SONG;
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_YEAR;
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_CUSTOM;
 
 /**
  * Utility class to help on queue related tasks.
@@ -46,8 +50,9 @@ public class QueueHelper {
 
     private static final int RANDOM_QUEUE_SIZE = 10;
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public static List<MediaSessionCompat.QueueItem> getPlayingQueue(String mediaId,
-            MusicProvider musicProvider) {
+                                                                     MusicProvider musicProvider) {
 
         // extract the browsing hierarchy from the media ID:
         String[] hierarchy = MediaIDHelper.getHierarchy(mediaId);
@@ -62,24 +67,31 @@ public class QueueHelper {
         LogHelper.d(TAG, "Creating playing queue for ", categoryType, ",  ", categoryValue);
 
         Iterable<MediaMetadataCompat> tracks = null;
-        // This sample only supports genre and by_search category types.
-		if (categoryType.equals(MEDIA_ID_MUSICS_BY_SONG)) {
-            tracks = musicProvider.getMusicsBySong(categoryValue);
-		}
-		else if (categoryType.equals(MEDIA_ID_MUSICS_BY_ARTIST)) {
-            tracks = musicProvider.getMusicsByArtist(categoryValue);
-        }
-		else if (categoryType.equals(MEDIA_ID_MUSICS_BY_ALBUM)) {
-            tracks = musicProvider.getMusicsByAlbum(categoryValue);
-		}
-		else if (categoryType.equals(MEDIA_ID_MUSICS_BY_GENRE)) {
-            tracks = musicProvider.getMusicsByYear(categoryValue);
-		}
-		else if (categoryType.equals(MEDIA_ID_MUSICS_BY_YEAR)) {
-            tracks = musicProvider.getMusicsByGenre(categoryValue);
-        }
-        else if (categoryType.equals(MEDIA_ID_MUSICS_BY_SEARCH)) {
-            tracks = musicProvider.searchMusicBySongTitle(categoryValue);
+        switch (categoryType) {
+            case MEDIA_ID_MUSICS_BY_SONG:
+                tracks = musicProvider.getMusicFromItem("Songs", "ID", "Title like ?", "%");
+                break;
+            case MEDIA_ID_MUSICS_BY_ARTIST:
+                tracks = musicProvider.getMusicFromItem("Songs", "ID", "Artist = ?", categoryValue);
+                break;
+            case MEDIA_ID_MUSICS_BY_ALBUM:
+                tracks = musicProvider.getMusicFromItem("Songs", "ID", "Album = ?", categoryValue);
+                break;
+            case MEDIA_ID_MUSICS_BY_GENRE:
+                tracks = musicProvider.getMusicFromItem("Songs", "ID", "Genre = ?", categoryValue);
+                break;
+            case MEDIA_ID_MUSICS_BY_YEAR:
+                tracks = musicProvider.getMusicFromItem("Songs", "ID", "Year = ?" , categoryValue);
+                break;
+            case MEDIA_ID_MUSICS_BY_DATE:
+                tracks = musicProvider.getMusicFromItem("Songs", "ID", "ModifiedDate = ?" , categoryValue);
+                break;
+            case MEDIA_ID_MUSICS_CUSTOM:
+                tracks = musicProvider.getMusicFromItem("Songs", "ID", "Year in (?)" , categoryValue);
+                break;
+            case MEDIA_ID_MUSICS_BY_SEARCH:
+                tracks = musicProvider.searchMusic(MediaMetadataCompat.METADATA_KEY_TITLE, categoryValue);
+                break;
         }
 
         if (tracks == null) {
@@ -108,13 +120,13 @@ public class QueueHelper {
 
         Iterable<MediaMetadataCompat> result = null;
         if (params.isAlbumFocus) {
-            result = musicProvider.searchMusicByAlbum(params.album);
+            result = musicProvider.searchMusic(MediaMetadataCompat.METADATA_KEY_ALBUM, params.album);
         } else if (params.isGenreFocus) {
-            result = musicProvider.getMusicsByGenre(params.genre);
+            result = musicProvider.searchMusic(MediaMetadataCompat.METADATA_KEY_GENRE, params.genre);
         } else if (params.isArtistFocus) {
-            result = musicProvider.searchMusicByArtist(params.artist);
+            result = musicProvider.searchMusic(MediaMetadataCompat.METADATA_KEY_ARTIST, params.artist);
         } else if (params.isSongFocus) {
-            result = musicProvider.searchMusicBySongTitle(params.song);
+            result = musicProvider.searchMusic(MediaMetadataCompat.METADATA_KEY_TITLE, params.song);
         }
 
         // If there was no results using media focus parameter, we do an unstructured query.
@@ -125,7 +137,7 @@ public class QueueHelper {
         if (params.isUnstructured || result == null || !result.iterator().hasNext()) {
             // To keep it simple for this example, we do unstructured searches on the
             // song title only. A real world application could search on other fields as well.
-            result = musicProvider.searchMusicBySongTitle(query);
+            result = musicProvider.searchMusic(MediaMetadataCompat.METADATA_KEY_GENRE, query);
         }
 
         return convertToQueue(result, MEDIA_ID_MUSICS_BY_SEARCH, query);

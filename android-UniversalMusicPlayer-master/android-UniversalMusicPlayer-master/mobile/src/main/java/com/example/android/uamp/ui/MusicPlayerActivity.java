@@ -20,9 +20,11 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.media.MediaBrowserCompat;
 import android.text.TextUtils;
 
+import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
 
@@ -54,7 +56,9 @@ public class MusicPlayerActivity extends BaseActivity
 
     private Bundle mVoiceSearchParams;
 
-    ArrayList sortOrder;
+    LocalBroadcastManager localBroadcastManager;
+    private ArrayList<String> sortOrder;
+    private ArrayList<String> searchStrings;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,10 +68,12 @@ public class MusicPlayerActivity extends BaseActivity
 
         initializeToolbar();
         startMediaBrowser();
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
         if(getCallingActivity() != null) {
             if (getCallingActivity().toString().contains("CustomizeActivity")) {
-                sortOrder = getIntent().getStringArrayListExtra("SORT_ORDER");
+                sortOrder = getIntent().getStringArrayListExtra(MusicService.SORT_ORDER_MESSAGE);
+                searchStrings = getIntent().getStringArrayListExtra(MusicService.SEARCH_MESSAGE);
             }
         }
 
@@ -179,6 +185,12 @@ public class MusicPlayerActivity extends BaseActivity
     }
 
     private MediaBrowserFragment getBrowseFragment() {
+        if(sortOrder != null) {
+            Intent intent = new Intent(MusicService.CUSTOMIZE_RESULT);
+            intent.putExtra(MusicService.SORT_ORDER_MESSAGE, sortOrder);
+            intent.putExtra(MusicService.SEARCH_MESSAGE, searchStrings);
+            localBroadcastManager.sendBroadcast(intent);
+        }
         return (MediaBrowserFragment) getFragmentManager().findFragmentByTag(FRAGMENT_TAG);
     }
 
