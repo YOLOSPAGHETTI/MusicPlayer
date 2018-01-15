@@ -73,7 +73,6 @@ public class LoadingActivity extends BaseActivity {
                 } else {
                     startActivity(new Intent(LoadingActivity.this, NoPermissionsActivity.class), null);
                 }
-                return;
             }
         }
     }
@@ -106,6 +105,7 @@ public class LoadingActivity extends BaseActivity {
                     NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
                     navigationView.setCheckedItem(R.id.navigation_allmusic);
                     startActivity(new Intent(LoadingActivity.this, MusicPlayerActivity.class), null);
+                    finish();
                 }
             }
         };

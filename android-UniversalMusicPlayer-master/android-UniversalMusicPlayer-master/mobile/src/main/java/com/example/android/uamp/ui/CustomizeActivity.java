@@ -149,6 +149,11 @@ public class CustomizeActivity extends BaseActivity {
         });
 
         setDateTextListeners(edit1, edit2);
+
+        if(!shouldShowControls()) {
+            View controls = findViewById(R.id.fragment_playback_controls);
+            controls.setVisibility(View.INVISIBLE);
+        }
     }
 
     public void addToSortOrder(String text) {
@@ -182,6 +187,9 @@ public class CustomizeActivity extends BaseActivity {
             String month = edit6.getText().toString();
             String year = edit7.getText().toString();
 
+            for(int i=searchStrings.size();i<sortOrder.indexOf("Date Added"); i++) {
+                searchStrings.add(i, null);
+            }
             if(checkValidDate(day, month, year)) {
                 searchStrings.add(sortOrder.indexOf("Date Added"),day+month+year);
             }
@@ -193,25 +201,35 @@ public class CustomizeActivity extends BaseActivity {
         EditText edit=(EditText) findViewById(R.id.search1);
         if(edit.getVisibility() == View.VISIBLE) {
             String text = edit.getText().toString();
-            searchStrings.add(sortOrder.indexOf("Artists"),text);
+            searchStrings = setSearchStrings(searchStrings, text, "Artists");
         }
         edit=(EditText) findViewById(R.id.search2);
         if(edit.getVisibility() == View.VISIBLE) {
             String text = edit.getText().toString();
-            searchStrings.add(sortOrder.indexOf("Albums"),text);
+            searchStrings = setSearchStrings(searchStrings, text, "Albums");
         }
         edit=(EditText) findViewById(R.id.search3);
         if(edit.getVisibility() == View.VISIBLE) {
             String text = edit.getText().toString();
-            searchStrings.add(sortOrder.indexOf("Genres"),text);
+            searchStrings = setSearchStrings(searchStrings, text, "Genres");
         }
         edit=(EditText) findViewById(R.id.search4);
         if(edit.getVisibility() == View.VISIBLE) {
             String text = edit.getText().toString();
-            searchStrings.add(sortOrder.indexOf("Years"),text);
+            searchStrings = setSearchStrings(searchStrings, text, "Years");
         }
         return searchStrings;
     }
+
+    private ArrayList<String> setSearchStrings(ArrayList<String> searchStrings, String text, String item) {
+        for(int i=searchStrings.size();i<sortOrder.indexOf(item); i++) {
+            searchStrings.add(i, null);
+        }
+        searchStrings.add(sortOrder.indexOf(item),text);
+
+        return searchStrings;
+    }
+
 
     // Gets the handle of the hidden text view from the text of the button
     public TextView getHiddenTextViewFromText(String text) {

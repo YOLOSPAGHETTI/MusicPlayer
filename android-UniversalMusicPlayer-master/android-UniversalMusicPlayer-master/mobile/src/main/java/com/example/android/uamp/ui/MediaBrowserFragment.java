@@ -66,6 +66,10 @@ public class MediaBrowserFragment extends Fragment {
     private MediaFragmentListener mMediaFragmentListener;
     private View mErrorView;
     private TextView mErrorMessage;
+
+    private List<Button> alphabetButtons = new ArrayList<>();
+    private List<Button> decadeButtons = new ArrayList<>();
+
     private final BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
         private boolean oldOnline = false;
         @Override
@@ -153,7 +157,7 @@ public class MediaBrowserFragment extends Fragment {
         mErrorView = rootView.findViewById(R.id.playback_error);
         mErrorMessage = (TextView) mErrorView.findViewById(R.id.error_message);
 
-        mBrowserAdapter = new BrowseAdapter(getActivity());
+        mBrowserAdapter = new BrowseAdapter(getActivity(), rootView);
 
         ListView listView = (ListView) rootView.findViewById(R.id.list_view);
         listView.setAdapter(mBrowserAdapter);
@@ -165,15 +169,27 @@ public class MediaBrowserFragment extends Fragment {
                 mMediaFragmentListener.onMediaItemSelected(item);
             }
         });
-		
+
+        setAlphabetButtons(rootView);
+        setDecadeButtons(rootView);
         if(getMediaId() == null) {
-            setAlphabetVisibility(rootView, View.INVISIBLE);
+            setAlphabetVisibility(View.INVISIBLE);
+            setDecadeVisibility(View.INVISIBLE);
+        }
+        else if(getMediaId().endsWith(MediaIDHelper.MEDIA_ID_MUSICS_BY_YEAR)) {
+            setAlphabetVisibility(View.INVISIBLE);
+            setDecadeVisibility(View.VISIBLE);
+        }
+        else if(getMediaId().endsWith(MediaIDHelper.MEDIA_ID_MUSICS_BY_DATE)) {
+            setAlphabetVisibility(View.INVISIBLE);
+            setDecadeVisibility(View.INVISIBLE);
         }
         else {
-            setAlphabetVisibility(rootView, View.VISIBLE);
+            setAlphabetVisibility(View.VISIBLE);
+            setDecadeVisibility(View.INVISIBLE);
         }
-		
-        setAlphabetButtonListeners(rootView);
+        setAlphabetButtonListeners(listView);
+        setDecadeButtonListeners(listView);
 
         return rootView;
     }
@@ -314,8 +330,10 @@ public class MediaBrowserFragment extends Fragment {
     // An adapter for showing the list of browsed MediaItem's
     private static class BrowseAdapter extends ArrayAdapter<MediaBrowserCompat.MediaItem> {
 
-        public BrowseAdapter(Activity context) {
+        public BrowseAdapter(Activity context, View rootView) {
             super(context, R.layout.media_list_item, new ArrayList<MediaBrowserCompat.MediaItem>());
+            //TextView textView = (TextView) rootView.findViewById(R.layout.media_list_item);
+            //textView.setSelected(true);
         }
 
         @Override
@@ -331,177 +349,97 @@ public class MediaBrowserFragment extends Fragment {
         void setToolbarTitle(CharSequence title);
     }
 
-    private void setAlphabetVisibility(View view, int visibility) {
-        final ListView listView = (ListView) view.findViewById(R.id.list_view);
+    public void setAlphabetButtons(View view) {
+        alphabetButtons.add((Button)view.findViewById(R.id.letterNum));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterA));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterB));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterC));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterD));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterE));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterF));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterG));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterH));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterI));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterJ));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterK));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterL));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterM));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterN));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterO));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterP));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterQ));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterR));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterS));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterT));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterU));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterV));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterW));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterX));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterY));
+        alphabetButtons.add((Button)view.findViewById(R.id.letterZ));
+    }
 
-        final Button buttonNum = (Button)view.findViewById(R.id.letterNum);
-        if(buttonNum.getVisibility() != visibility) {
-            buttonNum.setVisibility(visibility);
+    public void setDecadeButtons(View view) {
+        decadeButtons.add((Button)view.findViewById(R.id.decade1));
+        decadeButtons.add((Button)view.findViewById(R.id.decade2));
+        decadeButtons.add((Button)view.findViewById(R.id.decade3));
+        decadeButtons.add((Button)view.findViewById(R.id.decade4));
+        decadeButtons.add((Button)view.findViewById(R.id.decade5));
+        decadeButtons.add((Button)view.findViewById(R.id.decade6));
+        decadeButtons.add((Button)view.findViewById(R.id.decade7));
+        decadeButtons.add((Button)view.findViewById(R.id.decade8));
+        decadeButtons.add((Button)view.findViewById(R.id.decade9));
+        decadeButtons.add((Button)view.findViewById(R.id.decade10));
+    }
 
-            final Button buttonA = (Button) view.findViewById(R.id.letterA);
-            buttonA.setVisibility(visibility);
-
-            final Button buttonB = (Button) view.findViewById(R.id.letterB);
-            buttonB.setVisibility(visibility);
-
-            final Button buttonC = (Button) view.findViewById(R.id.letterC);
-            buttonC.setVisibility(visibility);
-
-            final Button buttonD = (Button) view.findViewById(R.id.letterD);
-            buttonD.setVisibility(visibility);
-
-            final Button buttonE = (Button) view.findViewById(R.id.letterE);
-            buttonE.setVisibility(visibility);
-
-            final Button buttonF = (Button) view.findViewById(R.id.letterF);
-            buttonF.setVisibility(visibility);
-
-            final Button buttonG = (Button) view.findViewById(R.id.letterG);
-            buttonG.setVisibility(visibility);
-
-            final Button buttonH = (Button) view.findViewById(R.id.letterH);
-            buttonH.setVisibility(visibility);
-
-            final Button buttonI = (Button) view.findViewById(R.id.letterI);
-            buttonI.setVisibility(visibility);
-
-            final Button buttonJ = (Button) view.findViewById(R.id.letterJ);
-            buttonJ.setVisibility(visibility);
-
-            final Button buttonK = (Button) view.findViewById(R.id.letterK);
-            buttonK.setVisibility(visibility);
-
-            final Button buttonL = (Button) view.findViewById(R.id.letterL);
-            buttonL.setVisibility(visibility);
-
-            final Button buttonM = (Button) view.findViewById(R.id.letterM);
-            buttonM.setVisibility(visibility);
-
-            final Button buttonN = (Button) view.findViewById(R.id.letterN);
-            buttonN.setVisibility(visibility);
-
-            final Button buttonO = (Button) view.findViewById(R.id.letterO);
-            buttonO.setVisibility(visibility);
-
-            final Button buttonP = (Button) view.findViewById(R.id.letterP);
-            buttonP.setVisibility(visibility);
-
-            final Button buttonQ = (Button) view.findViewById(R.id.letterQ);
-            buttonQ.setVisibility(visibility);
-
-            final Button buttonR = (Button) view.findViewById(R.id.letterR);
-            buttonR.setVisibility(visibility);
-
-            final Button buttonS = (Button) view.findViewById(R.id.letterS);
-            buttonS.setVisibility(visibility);
-
-            final Button buttonT = (Button) view.findViewById(R.id.letterT);
-            buttonT.setVisibility(visibility);
-
-            final Button buttonU = (Button) view.findViewById(R.id.letterU);
-            buttonU.setVisibility(visibility);
-
-            final Button buttonV = (Button) view.findViewById(R.id.letterV);
-            buttonV.setVisibility(visibility);
-
-            final Button buttonW = (Button) view.findViewById(R.id.letterW);
-            buttonW.setVisibility(visibility);
-
-            final Button buttonX = (Button) view.findViewById(R.id.letterX);
-            buttonX.setVisibility(visibility);
-
-            final Button buttonY = (Button) view.findViewById(R.id.letterY);
-            buttonY.setVisibility(visibility);
-
-            final Button buttonZ = (Button) view.findViewById(R.id.letterZ);
-            buttonZ.setVisibility(visibility);
+    private void setAlphabetVisibility(int visibility) {
+        for(int i=0; i<alphabetButtons.size(); i++) {
+            if(alphabetButtons.get(i).getVisibility() == visibility) {
+                break;
+            }
+            else {
+                alphabetButtons.get(i).setVisibility(visibility);
+            }
         }
     }
 
-    private void setAlphabetButtonListeners(View view) {
-        final ListView listView = (ListView) view.findViewById(R.id.list_view);
+    private void setDecadeVisibility(int visibility) {
+        for(int i=0; i<decadeButtons.size(); i++) {
+            if(decadeButtons.get(i).getVisibility() == visibility) {
+                break;
+            }
+            else {
+                decadeButtons.get(i).setVisibility(visibility);
+            }
+        }
+    }
 
-        final Button buttonNum = (Button)view.findViewById(R.id.letterNum);
-		if(buttonNum.getVisibility() == View.VISIBLE) {
-            setButtonListener(buttonNum, ' ', listView);
+    private void setAlphabetButtonListeners(ListView listView) {
 
-            final Button buttonA = (Button) view.findViewById(R.id.letterA);
-            setButtonListener(buttonA, 'A', listView);
+        for(int i=0; i<alphabetButtons.size(); i++) {
+            if(alphabetButtons.get(i).getVisibility() == View.INVISIBLE) {
+                break;
+            }
+            else {
+                if(i==0) {
+                    setButtonListener(alphabetButtons.get(i), ' ', listView);
+                }
+                else {
+                    setButtonListener(alphabetButtons.get(i), (char)(64+i), listView);
+                }
+            }
+        }
+    }
 
-            final Button buttonB = (Button) view.findViewById(R.id.letterB);
-            setButtonListener(buttonB, 'B', listView);
+    private void setDecadeButtonListeners(ListView listView) {
 
-            final Button buttonC = (Button) view.findViewById(R.id.letterC);
-            setButtonListener(buttonC, 'C', listView);
-
-            final Button buttonD = (Button) view.findViewById(R.id.letterD);
-            setButtonListener(buttonD, 'D', listView);
-
-            final Button buttonE = (Button) view.findViewById(R.id.letterE);
-            setButtonListener(buttonE, 'E', listView);
-
-            final Button buttonF = (Button) view.findViewById(R.id.letterF);
-            setButtonListener(buttonF, 'F', listView);
-
-            final Button buttonG = (Button) view.findViewById(R.id.letterG);
-            setButtonListener(buttonG, 'G', listView);
-
-            final Button buttonH = (Button) view.findViewById(R.id.letterH);
-            setButtonListener(buttonH, 'H', listView);
-
-            final Button buttonI = (Button) view.findViewById(R.id.letterI);
-            setButtonListener(buttonI, 'I', listView);
-
-            final Button buttonJ = (Button) view.findViewById(R.id.letterJ);
-            setButtonListener(buttonJ, 'J', listView);
-
-            final Button buttonK = (Button) view.findViewById(R.id.letterK);
-            setButtonListener(buttonK, 'K', listView);
-
-            final Button buttonL = (Button) view.findViewById(R.id.letterL);
-            setButtonListener(buttonL, 'L', listView);
-
-            final Button buttonM = (Button) view.findViewById(R.id.letterM);
-            setButtonListener(buttonM, 'M', listView);
-
-            final Button buttonN = (Button) view.findViewById(R.id.letterN);
-            setButtonListener(buttonN, 'N', listView);
-
-            final Button buttonO = (Button) view.findViewById(R.id.letterO);
-            setButtonListener(buttonO, 'O', listView);
-
-            final Button buttonP = (Button) view.findViewById(R.id.letterP);
-            setButtonListener(buttonP, 'P', listView);
-
-            final Button buttonQ = (Button) view.findViewById(R.id.letterQ);
-            setButtonListener(buttonQ, 'Q', listView);
-
-            final Button buttonR = (Button) view.findViewById(R.id.letterR);
-            setButtonListener(buttonR, 'R', listView);
-
-            final Button buttonS = (Button) view.findViewById(R.id.letterS);
-            setButtonListener(buttonS, 'S', listView);
-
-            final Button buttonT = (Button) view.findViewById(R.id.letterT);
-            setButtonListener(buttonT, 'T', listView);
-
-            final Button buttonU = (Button) view.findViewById(R.id.letterU);
-            setButtonListener(buttonU, 'U', listView);
-
-            final Button buttonV = (Button) view.findViewById(R.id.letterV);
-            setButtonListener(buttonV, 'V', listView);
-
-            final Button buttonW = (Button) view.findViewById(R.id.letterW);
-            setButtonListener(buttonW, 'W', listView);
-
-            final Button buttonX = (Button) view.findViewById(R.id.letterX);
-            setButtonListener(buttonX, 'X', listView);
-
-            final Button buttonY = (Button) view.findViewById(R.id.letterY);
-            setButtonListener(buttonY, 'Y', listView);
-
-            final Button buttonZ = (Button) view.findViewById(R.id.letterZ);
-            setButtonListener(buttonZ, 'Z', listView);
+        for(int i=0; i<decadeButtons.size(); i++) {
+            if(decadeButtons.get(i).getVisibility() == View.INVISIBLE) {
+                break;
+            }
+            else {
+                setButtonListener(decadeButtons.get(i), 192+i, listView);
+            }
         }
     }
 
@@ -513,12 +451,23 @@ public class MediaBrowserFragment extends Fragment {
         });
     }
 
+    private void setButtonListener(final Button button, final int number, final ListView listView) {
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                listView.setSelection(getFirstItemPositionForNum(number));
+            }
+        });
+    }
+
     private int getFirstItemPositionForLetter(char letter) {
         int position = 0;
         char nextLetter = (char)((int)letter+1);
         for(int i=0; i<mBrowserAdapter.getCount(); i++) {
             MediaBrowserCompat.MediaItem item = mBrowserAdapter.getItem(i);
             String word = item.toString().substring(33);
+            if(word.startsWith("The ")) {
+                word = word.replace("The ", "");
+            }
             if(letter != ' ') {
                 if (word.toUpperCase().startsWith(letter + "")) {
                     position = i;
@@ -535,6 +484,28 @@ public class MediaBrowserFragment extends Fragment {
             }
             else {
                 position = 0;
+            }
+        }
+        return position;
+    }
+
+    private int getFirstItemPositionForNum(int number) {
+        int position = 0;
+        int nextNum = number+1;
+        for(int i=0; i<mBrowserAdapter.getCount(); i++) {
+            MediaBrowserCompat.MediaItem item = mBrowserAdapter.getItem(i);
+            String word = item.toString().substring(33);
+            if (word.startsWith(number + "")) {
+                position = i;
+                break;
+            }
+            if (number == 201) {
+                if (word.startsWith(number + "")) {
+                    position = i;
+                    break;
+                }
+            } else if (i == mBrowserAdapter.getCount() - 1) {
+                position = i;
             }
         }
         return position;

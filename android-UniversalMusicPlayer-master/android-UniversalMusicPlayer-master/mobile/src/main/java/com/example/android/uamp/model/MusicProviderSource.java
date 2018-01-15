@@ -24,6 +24,4 @@ public interface MusicProviderSource {
     String CUSTOM_METADATA_TRACK_SOURCE = "_SOURCE_";
     String CUSTOM_METADATA_TRACK_DATE_ADDED = "_DATE_ADDED_";
     Iterator<MediaMetadataCompat> iterator();
-
-    long getCompletionPerc();
 }

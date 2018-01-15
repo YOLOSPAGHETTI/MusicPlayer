@@ -21,7 +21,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -36,6 +35,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.media.MediaRouter;
 
+import com.example.android.uamp.model.CompletionCalculation;
 import com.example.android.uamp.model.DBBuilder;
 import com.example.android.uamp.model.MusicProvider;
 import com.example.android.uamp.playback.CastPlayback;
@@ -157,8 +157,6 @@ public class MusicService extends MediaBrowserServiceCompat implements
     private boolean mIsConnectedToCar;
     private BroadcastReceiver mCarConnectionReceiver;
 
-    private SharedPreferences prefs = null;
-
     private LocalBroadcastManager localBroadcastManager;
     public static final String COMP_PERC_RESULT = "completion perc result";
     public static final String COMP_PERC_MESSAGE = "completion perc message";
@@ -168,7 +166,7 @@ public class MusicService extends MediaBrowserServiceCompat implements
     private Timer timer;
     private ArrayList<String> sortOrder;
     private ArrayList<String> searchStrings;
-
+    private CompletionCalculation cc = new CompletionCalculation(3);
     /*
      * (non-Javadoc)
      * @see android.app.Service#onCreate()
@@ -183,9 +181,8 @@ public class MusicService extends MediaBrowserServiceCompat implements
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
-
         final DBBuilder DBB = new DBBuilder(getApplicationContext());
-        mMusicProvider = new MusicProvider(DBB);
+        mMusicProvider = new MusicProvider(DBB, cc);
 
         runProgressTimer();
 
@@ -539,7 +536,7 @@ public class MusicService extends MediaBrowserServiceCompat implements
     private void sendCompletionPerc() {
         Intent intent = new Intent(COMP_PERC_RESULT);
         if(mMusicProvider != null) {
-            long completionPerc = mMusicProvider.getSourceCompletionPerc();
+            long completionPerc = cc.completionPerc;
             if(completionPerc > 99) {
                 timer.cancel();
             }

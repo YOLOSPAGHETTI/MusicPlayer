@@ -19,10 +19,10 @@ import java.util.Locale;
 
 public class DBBuilder extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "SongInfo.db";
+    private static final int DATABASE_VERSION = 1;
     private SQLiteDatabase db;
-    private ArrayList<Long> validSongRows = new ArrayList<Long>();
+    private ArrayList<Long> validSongRows = new ArrayList<>();
     private long maxSongID;
     private long maxArtistID;
     private long maxAlbumID;
@@ -34,6 +34,7 @@ public class DBBuilder extends SQLiteOpenHelper {
     }
     public void onCreate(SQLiteDatabase db) {
         this.db = db;
+        deleteTables();
         createTables();
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -109,7 +110,7 @@ public class DBBuilder extends SQLiteOpenHelper {
 
     // Deletes all tables in the DB at upgrade
     private void deleteTables() {
-        String SQL_DELETE_SONGS = "DROP TABLE SONGS;";
+        String SQL_DELETE_SONGS = "DROP TABLE Songs;";
         db.execSQL(SQL_DELETE_SONGS);
         String SQL_DELETE_ARTISTS = "DROP TABLE Artists;";
         db.execSQL(SQL_DELETE_ARTISTS);
@@ -255,7 +256,7 @@ public class DBBuilder extends SQLiteOpenHelper {
         String newDateStr = "";
         try {
             Date date = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.US).parse(modifiedDate);
-            newDateStr = new SimpleDateFormat("dd-MM-yyyy", Locale.US).format(date);
+            newDateStr = new SimpleDateFormat("dd-MMM-yyyy", Locale.US).format(date);
         }
         catch(ParseException e) {
             e.printStackTrace();
@@ -290,7 +291,7 @@ public class DBBuilder extends SQLiteOpenHelper {
         if(genreId.equals("")) {
             ContentValues genreValues = new ContentValues();
             genreValues.put("ID", maxGenreID);
-            genreValues.put("Genre", genre);
+            genreValues.put("Genre", genre.trim());
             genreId = ""+maxGenreID;
             maxGenreID++;
 
@@ -457,5 +458,17 @@ public class DBBuilder extends SQLiteOpenHelper {
         }
         cursor.close();
         return empty;
+    }
+
+    public void printTable(String table, int columns) {
+        String val;
+        String query = "select * from " + table;
+        List[] data = customQuery(query, null, columns);
+
+        for (int i = 0; i < data[0].size(); i++) {
+            for (int j = 0; j < columns; j++) {
+                System.out.println(data[j].get(i));
+            }
+        }
     }
 }

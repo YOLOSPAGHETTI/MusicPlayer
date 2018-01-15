@@ -66,33 +66,7 @@ public class QueueHelper {
         String categoryValue = hierarchy[1];
         LogHelper.d(TAG, "Creating playing queue for ", categoryType, ",  ", categoryValue);
 
-        Iterable<MediaMetadataCompat> tracks = null;
-        switch (categoryType) {
-            case MEDIA_ID_MUSICS_BY_SONG:
-                tracks = musicProvider.getMusicFromItem("Songs", "ID", "Title like ?", "%");
-                break;
-            case MEDIA_ID_MUSICS_BY_ARTIST:
-                tracks = musicProvider.getMusicFromItem("Songs", "ID", "Artist = ?", categoryValue);
-                break;
-            case MEDIA_ID_MUSICS_BY_ALBUM:
-                tracks = musicProvider.getMusicFromItem("Songs", "ID", "Album = ?", categoryValue);
-                break;
-            case MEDIA_ID_MUSICS_BY_GENRE:
-                tracks = musicProvider.getMusicFromItem("Songs", "ID", "Genre = ?", categoryValue);
-                break;
-            case MEDIA_ID_MUSICS_BY_YEAR:
-                tracks = musicProvider.getMusicFromItem("Songs", "ID", "Year = ?" , categoryValue);
-                break;
-            case MEDIA_ID_MUSICS_BY_DATE:
-                tracks = musicProvider.getMusicFromItem("Songs", "ID", "ModifiedDate = ?" , categoryValue);
-                break;
-            case MEDIA_ID_MUSICS_CUSTOM:
-                tracks = musicProvider.getMusicFromItem("Songs", "ID", "Year in (?)" , categoryValue);
-                break;
-            case MEDIA_ID_MUSICS_BY_SEARCH:
-                tracks = musicProvider.searchMusic(MediaMetadataCompat.METADATA_KEY_TITLE, categoryValue);
-                break;
-        }
+        Iterable<MediaMetadataCompat> tracks = musicProvider.getCurrentList();
 
         if (tracks == null) {
             LogHelper.e(TAG, "Unrecognized category type: ", categoryType, " for media ", mediaId);

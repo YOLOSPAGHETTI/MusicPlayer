@@ -61,19 +61,27 @@ public class MusicProvider {
     private MusicProviderSource mSource;
 
     private DBBuilder DBB;
+    private CompletionCalculation cc;
     private ArrayList<String> sortOrder;
     private ArrayList<String> searchStrings;
     private List<MediaMetadataCompat> musicList;
-    private List<String> songList;
+    private List<MediaMetadataCompat> sortedMusicList;
     private List<String> artistList;
     private List<String> albumList;
     private List<String> genreList;
     private List<Integer> yearList;
     private List<String> dateList;
+    private List<String> sortedArtistList;
+    private List<String> sortedAlbumList;
+    private List<String> sortedGenreList;
+    private List<Integer> sortedYearList;
+    private List<String> sortedDateList;
     private List<String> songIDList;
     private List<String> artistIDList;
     private List<String> albumIDList;
     private List<String> genreIDList;
+
+    private List<MediaMetadataCompat> currentList;
 
     enum State {
         NON_INITIALIZED, INITIALIZING, INITIALIZED
@@ -85,24 +93,31 @@ public class MusicProvider {
         void onMusicCatalogReady(boolean success);
     }
 
-    public MusicProvider(DBBuilder DBB) {
-        this(new MusicFileSource(DBB));
+    public MusicProvider(DBBuilder DBB, CompletionCalculation cc) {
+        this(new MusicFileSource(DBB, cc));
         this.DBB = DBB;
+        this.cc = cc;
     }
 
     public MusicProvider(MusicProviderSource source) {
         mSource = source;
         musicList = new ArrayList<>();
-        songList = new ArrayList<>();
+        sortedMusicList = new ArrayList<>();
         artistList = new ArrayList<>();
         albumList = new ArrayList<>();
         genreList = new ArrayList<>();
         yearList = new ArrayList<>();
         dateList = new ArrayList<>();
+        sortedArtistList = new ArrayList<>();
+        sortedAlbumList = new ArrayList<>();
+        sortedGenreList = new ArrayList<>();
+        sortedYearList = new ArrayList<>();
+        sortedDateList = new ArrayList<>();
         songIDList = new ArrayList<>();
         artistIDList = new ArrayList<>();
         albumIDList = new ArrayList<>();
         genreIDList = new ArrayList<>();
+        currentList = new ArrayList<>();
     }
 
     /**
@@ -213,13 +228,15 @@ public class MusicProvider {
                     //String musicId = item.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID);
                     musicList.add(item);
                 }
-                sortMusic(musicList);
-                getSongsFromDB();
+                cc.recalculate(2, 20);
+                getSongInfoFromDB();
+                cc.recalculate(2, 40);
                 getArtistsFromDB();
+                cc.recalculate(2, 60);
                 getAlbumsFromDB();
+                cc.recalculate(2, 80);
                 getGenresFromDB();
-                getYearsFromDB();
-                getDatesFromDB();
+                cc.recalculate(2, 100);
 
                 mCurrentState = State.INITIALIZED;
             }
@@ -234,8 +251,8 @@ public class MusicProvider {
 
     public List<MediaBrowserCompat.MediaItem> getChildren(String mediaId, Resources resources) {
         List<MediaBrowserCompat.MediaItem> mediaItems = new ArrayList<>();
-        System.out.println(mediaId);
-        System.out.println(sortOrder);
+        //System.out.println(mediaId);
+        //System.out.println(sortOrder);
         if (!MediaIDHelper.isBrowseable(mediaId)) {
             return mediaItems;
         }
@@ -257,76 +274,76 @@ public class MusicProvider {
                     "com.example.android.uamp/drawable/ic_by_genre")));
         }
         if (MEDIA_ID_MUSICS_BY_SONG.equals(mediaId)) {
-            for (Object metadataObj : getMusicFromItem("Songs", "ID", "Title like ?", "%")) {
+            currentList.clear();
+            if(sortedMusicList.size() == 0) {
+                sortedMusicList.addAll(musicList);
+                sortMusic(sortedMusicList);
+            }
+            for (Object metadataObj : sortedMusicList) {
                 MediaMetadataCompat metadata = ((MediaMetadataCompat) metadataObj);
-                mediaItems.add(createMediaItem(metadata, MediaMetadataCompat.METADATA_KEY_TITLE, MEDIA_ID_MUSICS_BY_SONG));
+                mediaItems.add(createMediaItem(metadata, MediaMetadataCompat.METADATA_KEY_TITLE, mediaId));
             }
         }
         else if (MEDIA_ID_MUSICS_BY_ARTIST.equals(mediaId)) {
-            for (Object artistObj : artistList) {
-                String artist = artistObj.toString();
-                mediaItems.add(createBrowsableMediaItemForData(artist, MEDIA_ID_MUSICS_BY_ARTIST));
-            }
+            createSortedItemList(artistList, sortedArtistList);
+            mediaItems = createMediaItems(sortedArtistList, mediaId, mediaItems);
         }
         else if (mediaId.startsWith(MEDIA_ID_MUSICS_BY_ARTIST)) {
             String artist = MediaIDHelper.getHierarchy(mediaId)[1];
             String ID = artistIDList.get(artistList.indexOf(artist));
+            currentList.clear();
             for (Object metadataObj : getMusicFromItem("SongArtists", "SongID", "ArtistID = ?", ID)) {
                 MediaMetadataCompat metadata = ((MediaMetadataCompat) metadataObj);
                 mediaItems.add(createMediaItem(metadata, MediaMetadataCompat.METADATA_KEY_ARTIST, MEDIA_ID_MUSICS_BY_ARTIST));
             }
         }
         else if (MEDIA_ID_MUSICS_BY_ALBUM.equals(mediaId)) {
-            for (Object albumObj : albumList) {
-                String album = albumObj.toString();
-                mediaItems.add(createBrowsableMediaItemForData(album, MEDIA_ID_MUSICS_BY_ALBUM));
-            }
+            createSortedItemList(albumList, sortedAlbumList);
+            mediaItems = createMediaItems(sortedAlbumList, mediaId, mediaItems);
         }
         else if (mediaId.startsWith(MEDIA_ID_MUSICS_BY_ALBUM)) {
             String album = MediaIDHelper.getHierarchy(mediaId)[1];
             String ID = albumIDList.get(albumList.indexOf(album));
             //String albumArtist = DBB.easyShortQuery("Albums", "AlbumArtist", "ID = ?", ID, null);
+            currentList.clear();
             for (Object metadataObj : getMusicFromItem("Songs", "ID", "Album = ?", album)) {
                 MediaMetadataCompat metadata = ((MediaMetadataCompat) metadataObj);
                 mediaItems.add(createMediaItem(metadata, MediaMetadataCompat.METADATA_KEY_ALBUM, MEDIA_ID_MUSICS_BY_ALBUM));
             }
         }
         else if (MEDIA_ID_MUSICS_BY_GENRE.equals(mediaId)) {
-            for (Object genreObj : genreList) {
-                String genre = genreObj.toString();
-                mediaItems.add(createBrowsableMediaItemForData(genre, MEDIA_ID_MUSICS_BY_GENRE));
-            }
+            createSortedItemList(genreList, sortedGenreList);
+            mediaItems = createMediaItems(sortedGenreList, mediaId, mediaItems);
         }
         else if (mediaId.startsWith(MEDIA_ID_MUSICS_BY_GENRE)) {
             String genre = MediaIDHelper.getHierarchy(mediaId)[1];
             String ID = genreIDList.get(genreList.indexOf(genre));
+            currentList.clear();
             for (Object metadataObj : getMusicFromItem("SongGenres", "SongID", "GenreID = ?", ID)) {
                 MediaMetadataCompat metadata = ((MediaMetadataCompat) metadataObj);
                 mediaItems.add(createMediaItem(metadata, MediaMetadataCompat.METADATA_KEY_GENRE, MEDIA_ID_MUSICS_BY_GENRE));
             }
         }
         else if (MEDIA_ID_MUSICS_BY_YEAR.equals(mediaId)) {
-            for (Object yearObj : yearList) {
-                String year = yearObj.toString();
-                mediaItems.add(createBrowsableMediaItemForData(year, MEDIA_ID_MUSICS_BY_YEAR));
-            }
+            createSortedItemList(yearList, sortedYearList);
+            mediaItems = createMediaItems(sortedYearList, mediaId, mediaItems);
         }
         else if (mediaId.startsWith(MEDIA_ID_MUSICS_BY_YEAR)) {
             String year = MediaIDHelper.getHierarchy(mediaId)[1];
+            currentList.clear();
             for (Object metadataObj : getMusicFromItem("Songs", "ID", "Year = ?" , year)) {
                 MediaMetadataCompat metadata = ((MediaMetadataCompat) metadataObj);
                 mediaItems.add(createMediaItem(metadata, MediaMetadataCompat.METADATA_KEY_YEAR, MEDIA_ID_MUSICS_BY_YEAR));
             }
         }
         else if (MEDIA_ID_MUSICS_BY_DATE.equals(mediaId)) {
-            for (Object dateObj : dateList) {
-                String date = dateObj.toString();
-                mediaItems.add(createBrowsableMediaItemForData(date, MEDIA_ID_MUSICS_BY_DATE));
-            }
+            createSortedItemList(dateList, sortedDateList);
+            mediaItems = createMediaItems(sortedDateList, mediaId, mediaItems);
         }
         else if (mediaId.startsWith(MEDIA_ID_MUSICS_BY_DATE)) {
             String dateStr = MediaIDHelper.getHierarchy(mediaId)[1];
-            for (Object metadataObj : getMusicFromItem("Songs", "ID", "ModifiedDate = ?", dateStr)) {
+            currentList.clear();
+            for (Object metadataObj : getMusicFromItem("Songs", "ID", "ModifiedDate = ?" , dateStr)) {
                 MediaMetadataCompat metadata = ((MediaMetadataCompat) metadataObj);
                 mediaItems.add(createMediaItem(metadata, MusicProviderSource.CUSTOM_METADATA_TRACK_DATE_ADDED, MEDIA_ID_MUSICS_BY_DATE));
             }
@@ -336,12 +353,7 @@ public class MusicProvider {
                 String newMediaId = extractMediaIdFromSortOrder(0);
                 List list = extractListFromSortOrder(0);
                 String searchString = searchStrings.get(0);
-                for (Object obj : list) {
-                    String item = obj.toString();
-                    if(item.toLowerCase().contains(searchString.toLowerCase())) {
-                        mediaItems.add(createBrowsableMediaItemForCustomData(item, newMediaId, mediaId));
-                    }
-                }
+                mediaItems = createCustomMediaItems(list, mediaId, newMediaId, mediaItems, searchString);
             }
         }
         else if (mediaId.startsWith(MEDIA_ID_MUSICS_CUSTOM)) {
@@ -353,6 +365,9 @@ public class MusicProvider {
                     String newMediaId = extractMediaIdFromSortOrder(index);
                     List list = getListFromItem(newMediaId, mediaId);
                     String searchString = searchStrings.get(index);
+                    if(searchString==null) {
+                        searchString = "";
+                    }
                     for (Object obj : list) {
                         String item = obj.toString();
                         if (item.toLowerCase().contains(searchString.toLowerCase())) {
@@ -362,6 +377,7 @@ public class MusicProvider {
                 }
                 else {
                     List list = getListFromItem(MEDIA_ID_MUSICS_BY_SONG, mediaId);
+                    currentList.clear();
                     for (Object obj : list) {
                         MediaMetadataCompat metadata = ((MediaMetadataCompat) obj);
                         mediaItems.add(createMediaItem(metadata, MediaMetadataCompat.METADATA_KEY_TITLE, MEDIA_ID_MUSICS_BY_SONG));
@@ -409,6 +425,7 @@ public class MusicProvider {
         // can set a hierarchy-aware mediaID. We will need to know the media hierarchy
         // when we get a onPlayFromMusicID call, so we can create the proper queue based
         // on where the music was selected from (by artist, by genre, random, etc)
+        currentList.add(metadata);
         String label;
         if (id.equals(MEDIA_ID_MUSICS_BY_YEAR)) {
             label = "" + metadata.getLong(key);
@@ -425,34 +442,30 @@ public class MusicProvider {
 
     }
 
-    public long getSourceCompletionPerc() {
-        return mSource.getCompletionPerc();
-    }
-
     // Pulls a list of all the songs and their corresponding ID's from the DB
-    private void getSongsFromDB() {
-        String[] projection = {"ID", "Title"};
+    private void getSongInfoFromDB() {
+        String[] projection = {"ID", "Title", "Year", "ModifiedDate"};
         String[] selectionArgs = {"%"};
         List[] data = DBB.normalQuery("Songs", projection, "ID like ?", selectionArgs, null, projection.length);
 
         try {
             if (data[0] != null) {
-                List<String> unsortedIDs = new ArrayList<>();
-                List<String> unsortedSongs = new ArrayList<>();
                 for (int i = 0; i < data[0].size(); i++) {
                     String ID = ignoreNulls(data[0].get(i));
-                    String title = ignoreNulls(data[1].get(i));
+                    int year = ignoreInvalidNums(ignoreNulls(data[2].get(i)));
+                    String dateStr = ignoreNulls(data[3].get(i));
 
                     songIDList.add(ID);
-                    songList.add(title);
-                    unsortedIDs.add(ID);
-                    unsortedSongs.add(title);
+
+                    if (!yearList.contains(year)) {
+                        yearList.add(year);
+                    }
+                    if (!dateList.contains(dateStr)) {
+                        dateList.add(dateStr);
+                    }
                 }
-                sortStrings(songList);
-                sortIDs(unsortedSongs, unsortedIDs, songIDList);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -465,19 +478,13 @@ public class MusicProvider {
 
         try {
             if (data[0] != null) {
-                List<String> unsortedIDs = new ArrayList<>();
-                List<String> unsortedArtists = new ArrayList<>();
                 for (int i = 0; i < data[0].size(); i++) {
                     String ID = ignoreNulls(data[0].get(i));
                     String artist = ignoreNulls(data[1].get(i));
 
                     artistIDList.add(ID);
                     artistList.add(artist);
-                    unsortedIDs.add(ID);
-                    unsortedArtists.add(artist);
                 }
-                sortStrings(artistList);
-                sortIDs(unsortedArtists, unsortedIDs, artistIDList);
             }
         }
         catch (Exception e) {
@@ -493,19 +500,13 @@ public class MusicProvider {
 
         try {
             if (data[0] != null) {
-                List<String> unsortedIDs = new ArrayList<>();
-                List<String> unsortedAlbums = new ArrayList<>();
                 for (int i = 0; i < data[0].size(); i++) {
                     String ID = ignoreNulls(data[0].get(i));
                     String album = ignoreNulls(data[1].get(i));
 
                     albumIDList.add(ID);
                     albumList.add(album);
-                    unsortedIDs.add(ID);
-                    unsortedAlbums.add(album);
                 }
-                sortStrings(albumList);
-                sortIDs(unsortedAlbums, unsortedIDs, albumIDList);
             }
         }
         catch (Exception e) {
@@ -521,71 +522,57 @@ public class MusicProvider {
 
         try {
             if (data[0] != null) {
-                List<String> unsortedIDs = new ArrayList<>();
-                List<String> unsortedGenres = new ArrayList<>();
                 for (int i = 0; i < data[0].size(); i++) {
                     String ID = ignoreNulls(data[0].get(i));
                     String genre = ignoreNulls(data[1].get(i));
 
                     genreIDList.add(ID);
                     genreList.add(genre);
-                    unsortedIDs.add(ID);
-                    unsortedGenres.add(genre);
                 }
-                sortStrings(genreList);
-                sortIDs(unsortedGenres, unsortedIDs, genreIDList);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Pulls a list of years from the DB with the passed song ID(s)
-    private void getYearsFromDB() {
-        String[] projection = {"Year"};
-        String[] selectionArgs = {"%"};
-        List[] data = DBB.normalQuery("Songs", projection, "ID like ?", selectionArgs, null, projection.length);
-        try {
-            if (data[0] != null) {
-                for (int i = 0; i < data[0].size(); i++) {
-                    int year = ignoreInvalidNums(ignoreNulls(data[0].get(i)));
-                    if(!yearList.contains(year)) {
-                        yearList.add(year);
-                    }
-                }
-                sortNums(yearList);
+    private void createSortedItemList(List list, List sortedList) {
+        if(sortedList.size() == 0) {
+            sortedList.addAll(list);
+            if(list == yearList) {
+                sortNums(sortedList);
             }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+            else if(list == dateList) {
+                sortDates(sortedList);
+            }
+            else {
+                sortStrings(sortedList);
+            }
         }
     }
 
-    // Pulls a list of modified times from the DB with the passed song ID(s)
-    private void getDatesFromDB() {
-        String[] projection = {"ModifiedDate"};
-        String[] selectionArgs = {"%"};
-        List[] data = DBB.normalQuery("Songs", projection, "ID like ?", selectionArgs, null, projection.length);
+    private List<MediaBrowserCompat.MediaItem> createMediaItems(List sortedList, String mediaId, List<MediaBrowserCompat.MediaItem> mediaItems) {
+        for (Object itemObj : sortedList) {
+            String item = itemObj.toString();
+            mediaItems.add(createBrowsableMediaItemForData(item, mediaId));
+        }
 
-        try {
-            if (data[0] != null) {
-                for (int i = 0; i < data[0].size(); i++) {
-                    String dateStr = ignoreNulls(data[0].get(i));
-                    if(!dateList.contains(dateStr)) {
-                        dateList.add(dateStr);
-                    }
-                }
-                sortDates(dateList);
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        return mediaItems;
     }
 
-    private List<String> getListFromItem(String newMediaId, String mediaId) {
-        List list = new ArrayList<String>();
+    private List<MediaBrowserCompat.MediaItem> createCustomMediaItems(List sortedList, String mediaId, String newMediaId,
+                                                                          List<MediaBrowserCompat.MediaItem> mediaItems, String searchString) {
+        for (Object obj : sortedList) {
+            String item = obj.toString();
+            if(item.toLowerCase().contains(searchString.toLowerCase())) {
+                mediaItems.add(createBrowsableMediaItemForCustomData(item, newMediaId, mediaId));
+            }
+        }
+
+        return mediaItems;
+    }
+
+    private List getListFromItem(String newMediaId, String mediaId) {
+        List list = new ArrayList<>();
         int lastIdVal = MediaIDHelper.getHierarchy(mediaId).length;
         String[] selection = new String[6];
         for(int i=0; i<6; i++) {
@@ -605,51 +592,82 @@ public class MusicProvider {
             if(!hasVal) {
                 selection[i] = "%";
             }
-            System.out.println(selection[i]);
         }
         String query = buildQuery(newMediaId);
         List<String>[] data;
-        System.out.println(query);
         switch(newMediaId) {
             case(MEDIA_ID_MUSICS_BY_SONG):
                 data = DBB.customQuery(query, selection, 2);
+                boolean exists = false;
                 for (int i = 0; i < data[0].size(); i++) {
-                    list.add(musicList.get(songIDList.indexOf(ignoreNulls(data[0].get(i)))));
+                    for (int j = 0; j < list.size(); j++)
+                    {
+                        MediaMetadataCompat metadata = (MediaMetadataCompat)list.get(j);
+                        if(metadata.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID).equals(ignoreNulls(data[0].get(i)))) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if(!exists) {
+                        list.add(musicList.get(songIDList.indexOf(ignoreNulls(data[0].get(i)))));
+                    }
+                    exists = false;
+                }
+                if(mediaId.contains(MEDIA_ID_MUSICS_BY_ALBUM)) {
+                    sortMusicByTrackNum(list);
+                }
+                else {
+                    sortMusic(list);
                 }
                 break;
             case(MEDIA_ID_MUSICS_BY_ARTIST):
                 data = DBB.customQuery(query, selection, 2);
                 for (int i = 0; i < data[1].size(); i++) {
-                    list.add(ignoreNulls(data[1].get(i)));
+                    if(!list.contains(ignoreNulls(data[1].get(i)))) {
+                        list.add(ignoreNulls(data[1].get(i)));
+                    }
                 }
+                sortStrings(list);
                 break;
 
             case(MEDIA_ID_MUSICS_BY_ALBUM):
                 data = DBB.customQuery(query, selection, 1);
                 for (int i = 0; i < data[0].size(); i++) {
-                    list.add(ignoreNulls(data[0].get(i)));
+                    if(!list.contains(ignoreNulls(data[0].get(i)))) {
+                        list.add(ignoreNulls(data[0].get(i)));
+                    }
                 }
+                sortStrings(list);
                 break;
 
             case(MEDIA_ID_MUSICS_BY_GENRE):
                 data = DBB.customQuery(query, selection, 2);
                 for (int i = 0; i < data[1].size(); i++) {
-                    list.add(ignoreNulls(data[1].get(i)));
+                    if(!list.contains(ignoreNulls(data[1].get(i)))) {
+                        list.add(ignoreNulls(data[1].get(i)));
+                    }
                 }
+                sortStrings(list);
                 break;
 
             case(MEDIA_ID_MUSICS_BY_YEAR):
                 data = DBB.customQuery(query, selection, 1);
                 for (int i = 0; i < data[0].size(); i++) {
-                    list.add(ignoreNulls(data[0].get(i)));
+                    if(!list.contains(ignoreNulls(data[0].get(i)))) {
+                        list.add(ignoreNulls(data[0].get(i)));
+                    }
                 }
+                sortStrings(list);
                 break;
 
             case(MEDIA_ID_MUSICS_BY_DATE):
                 data = DBB.customQuery(query, selection, 1);
                 for (int i = 0; i < data[0].size(); i++) {
-                    list.add(ignoreNulls(data[0].get(i)));
+                    if(!list.contains(ignoreNulls(data[0].get(i)))) {
+                        list.add(ignoreNulls(data[0].get(i)));
+                    }
                 }
+                sortStrings(list);
                 break;
         }
         return list;
@@ -684,6 +702,8 @@ public class MusicProvider {
                 "where A.ID = E.SongID and\n" +
                 "A.ID = F.SongID and\n" +
                 "B.ID = E.ArtistID and\n" +
+                //"A.Album = C.Album and\n" +
+                //"A.AlbumArtist = C.AlbumArtist and\n" +
                 "D.ID = F.GenreID and\n" +
                 "A.Title like ? and\n" +
                 "B.Artist like ? and\n" +
@@ -718,7 +738,7 @@ public class MusicProvider {
         return slot;
     }
 
-    public List getMusicFromItem(String table, String projectionStr,  String selectionStr, String selection) {
+    private List getMusicFromItem(String table, String projectionStr,  String selectionStr, String selection) {
         String[] projection = {projectionStr};
         String[] selectionArgs = {selection};
         List[] data = DBB.normalQuery(table, projection, selectionStr, selectionArgs, null, projection.length);
@@ -729,7 +749,12 @@ public class MusicProvider {
                 for (int i = 0; i < data[0].size(); i++) {
                     list.add(musicList.get(songIDList.indexOf(ignoreNulls(data[0].get(i)))));
                 }
-                sortMusic(list);
+                if(selectionStr.contains("Album")) {
+                    sortMusicByTrackNum(list);
+                }
+                else {
+                    sortMusic(list);
+                }
             }
         }
         catch (Exception e) {
@@ -803,42 +828,19 @@ public class MusicProvider {
         });
     }
 
-    // Sorts the lists of IDs to line up the indexes of the corresponding items
-    private void sortIDs(final List items, final List unsortedIDs, List IDs) {
-        Collections.sort(IDs, new Comparator<String>()
-        {
-            @Override
-            public int compare(String ID1, String ID2)
-            {
-                int index1 = unsortedIDs.indexOf(ID1);
-                int index2 = unsortedIDs.indexOf(ID2);
-                String item1 = (String)items.get(index1);
-                String item2 = (String)items.get(index2);
-                if(item1.startsWith("The ")) {
-                    item1 = item1.replace("The ", "");
-                }
-                if(item2.startsWith("The ")) {
-                    item2 = item2.replace("The ", "");
-                }
-                return item1.compareToIgnoreCase(item2);
-            }
-        });
-    }
-
     // Sorts the lists with numbers in ascending order
-    private List<String> sortDates(List items) {
-        Collections.sort(items, new Comparator<String>()
-        {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-            @Override
-            public int compare(String item1, String item2)
-            {
+    private void sortDates(List items) {
+        Collections.sort(items, new Comparator<String>() {
+                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                @Override
+                public int compare(String item1, String item2) {
                 int date1Num = 0;
                 int date2Num = 0;
                 //Fri Oct 06 22:52:31 EDT 2017
                 try {
-                    Date date1 = new SimpleDateFormat("MMM-dd-yyyy", Locale.US).parse(item1);
-                    Date date2 = new SimpleDateFormat("MMM-dd-yyyy", Locale.US).parse(item2);
+                    // Switch to dd-MMM-yyyy for next update
+                    Date date1 = new SimpleDateFormat("dd-MMM-yyyy", Locale.US).parse(item1);
+                    Date date2 = new SimpleDateFormat("dd-MMM-yyyy", Locale.US).parse(item2);
                     date1Num = Integer.parseInt(new SimpleDateFormat("yyyyMMdd", Locale.US).format(date1));
                     date2Num = Integer.parseInt(new SimpleDateFormat("yyyyMMdd", Locale.US).format(date2));
                 }
@@ -846,13 +848,12 @@ public class MusicProvider {
                     e.printStackTrace();
                 }
                 return Integer.compare(date2Num, date1Num);
-            }
-        });
-        return items;
+                }
+            });
     }
 
     // Sorts the lists with numbers in ascending order
-    private List sortNums(List items) {
+    private void sortNums(List items) {
         Collections.sort(items, new Comparator<Integer>()
         {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -862,7 +863,6 @@ public class MusicProvider {
                 return Integer.compare(item1, item2);
             }
         });
-        return items;
     }
 
     private String extractMediaIdFromSortOrder(int index) {
@@ -893,22 +893,32 @@ public class MusicProvider {
         String item = sortOrder.get(index);
         switch (item) {
             case "Artists":
-                list = artistList;
+                createSortedItemList(artistList, sortedArtistList);
+                list = sortedArtistList;
                 break;
             case "Albums":
-                list = albumList;
+                createSortedItemList(albumList, sortedAlbumList);
+                list = sortedAlbumList;
                 break;
             case "Genres":
-                list = genreList;
+                createSortedItemList(genreList, sortedGenreList);
+                list = sortedGenreList;
                 break;
             case "Years":
-                list = yearList;
+                createSortedItemList(yearList, sortedYearList);
+                list = sortedYearList;
                 break;
             case "Date Added":
-                list = dateList;
+                createSortedItemList(dateList, sortedDateList);
+                list = sortedDateList;
                 break;
         }
         return list;
+    }
+
+    public List<MediaMetadataCompat> getCurrentList() {
+        //System.out.println(currentList.get(0));
+        return currentList;
     }
 
     public void customize(ArrayList<String> sortOrder, ArrayList<String> searchStrings) {

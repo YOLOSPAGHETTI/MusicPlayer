@@ -233,6 +233,7 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
 				mMediaBrowser.connect();
 			}
 			catch(IllegalStateException e) {
+				e.printStackTrace();
 			}
 		}
 	}

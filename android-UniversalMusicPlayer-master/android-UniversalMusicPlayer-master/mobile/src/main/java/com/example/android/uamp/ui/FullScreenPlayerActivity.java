@@ -18,7 +18,10 @@ package com.example.android.uamp.ui;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -38,9 +41,9 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.example.android.uamp.AlbumArtCache;
 import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
+import com.example.android.uamp.model.MusicProviderSource;
 import com.example.android.uamp.utils.LogHelper;
 
 import java.util.concurrent.Executors;
@@ -102,7 +105,7 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             if (metadata != null) {
-                updateMediaDescription(metadata.getDescription());
+                updateMediaDescription(metadata);
                 updateDuration(metadata);
             }
         }
@@ -229,7 +232,7 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         updatePlaybackState(state);
         MediaMetadataCompat metadata = mediaController.getMetadata();
         if (metadata != null) {
-            updateMediaDescription(metadata.getDescription());
+            updateMediaDescription(metadata);
             updateDuration(metadata);
         }
         updateProgress();
@@ -241,10 +244,10 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
 
     private void updateFromParams(Intent intent) {
         if (intent != null) {
-            MediaDescriptionCompat description = intent.getParcelableExtra(
+            MediaMetadataCompat metadata = intent.getParcelableExtra(
                 MusicPlayerActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION);
-            if (description != null) {
-                updateMediaDescription(description);
+            if (metadata != null) {
+                updateMediaDescription(metadata);
             }
         }
     }
@@ -295,43 +298,31 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         mExecutorService.shutdown();
     }
 
-    private void fetchImageAsync(@NonNull MediaDescriptionCompat description) {
-        if (description.getIconUri() == null) {
-            return;
-        }
-        String artUrl = description.getIconUri().toString();
-        mCurrentArtUrl = artUrl;
-        AlbumArtCache cache = AlbumArtCache.getInstance();
-        Bitmap art = cache.getBigImage(artUrl);
-        if (art == null) {
-            art = description.getIconBitmap();
-        }
-        if (art != null) {
-            // if we have the art cached or from the MediaDescription, use it:
-            mBackgroundImage.setImageBitmap(art);
-        } else {
-            // otherwise, fetch a high res version and update:
-            cache.fetch(artUrl, new AlbumArtCache.FetchListener() {
-                @Override
-                public void onFetched(String artUrl, Bitmap bitmap, Bitmap icon) {
-                    // sanity check, in case a new fetch request has been done while
-                    // the previous hasn't yet returned:
-                    if (artUrl.equals(mCurrentArtUrl)) {
-                        mBackgroundImage.setImageBitmap(bitmap);
-                    }
-                }
-            });
+    private void fetchImageAsync(MediaMetadataCompat metadata) {
+        MediaDescriptionCompat description = metadata.getDescription();
+        if(metadata != null) {
+            MediaMetadataRetriever mMMDR = new MediaMetadataRetriever();
+            Uri uri = Uri.parse(metadata.getString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE));
+            mMMDR.setDataSource(uri.getPath());
+            byte[] iconBytes = mMMDR.getEmbeddedPicture();
+            Bitmap bitmap = scaleDown(BitmapFactory.decodeByteArray(iconBytes, 0, iconBytes.length), 512, true);
+
+            if (bitmap != null) {
+                // if we have the art cached or from the MediaDescription, use it:
+                mBackgroundImage.setImageBitmap(bitmap);
+            }
         }
     }
 
-    private void updateMediaDescription(MediaDescriptionCompat description) {
+    private void updateMediaDescription(MediaMetadataCompat metadata) {
+        MediaDescriptionCompat description = metadata.getDescription();
         if (description == null) {
             return;
         }
         LogHelper.d(TAG, "updateMediaDescription called ");
         mLine1.setText(description.getTitle());
         mLine2.setText(description.getSubtitle());
-        fetchImageAsync(description);
+        fetchImageAsync(metadata);
     }
 
     private void updateDuration(MediaMetadataCompat metadata) {
@@ -410,5 +401,18 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
             currentPosition += (int) timeDelta * mLastPlaybackState.getPlaybackSpeed();
         }
         mSeekbar.setProgress((int) currentPosition);
+    }
+
+    public static Bitmap scaleDown(Bitmap realImage, float maxImageSize,
+                                   boolean filter) {
+        float ratio = Math.min(
+                (float) maxImageSize / realImage.getWidth(),
+                (float) maxImageSize / realImage.getHeight());
+        int width = Math.round((float) ratio * realImage.getWidth());
+        int height = Math.round((float) ratio * realImage.getHeight());
+
+        Bitmap newBitmap = Bitmap.createScaledBitmap(realImage, width,
+                height, filter);
+        return newBitmap;
     }
 }

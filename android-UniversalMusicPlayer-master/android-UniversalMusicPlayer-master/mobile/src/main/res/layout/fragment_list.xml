@@ -486,4 +486,173 @@
         </TableRow>
     </TableLayout>
 
+    <TableLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/tableLayoutDecades">
+
+        <TableRow
+            android:id="@+id/tableRowdecade1"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/decade1"
+                android:layout_width="@dimen/letter_button_width"
+                android:layout_height="wrap_content"
+                android:text="20"
+                android:textSize="@dimen/letter_size"
+                android:textColor="@color/grey"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:background="?android:selectableItemBackground"/>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowdecade2"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/decade2"
+                android:layout_width="@dimen/letter_button_width"
+                android:layout_height="wrap_content"
+                android:text="30"
+                android:textSize="@dimen/letter_size"
+                android:textColor="@color/grey"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:background="?android:selectableItemBackground"/>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowdecade3"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/decade3"
+                android:layout_width="@dimen/letter_button_width"
+                android:layout_height="wrap_content"
+                android:text="40"
+                android:textSize="@dimen/letter_size"
+                android:textColor="@color/grey"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:background="?android:selectableItemBackground"/>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowdecade4"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/decade4"
+                android:layout_width="@dimen/letter_button_width"
+                android:layout_height="wrap_content"
+                android:text="50"
+                android:textSize="@dimen/letter_size"
+                android:textColor="@color/grey"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:background="?android:selectableItemBackground"/>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowdecade5"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/decade5"
+                android:layout_width="@dimen/letter_button_width"
+                android:layout_height="wrap_content"
+                android:text="60"
+                android:textSize="@dimen/letter_size"
+                android:textColor="@color/grey"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:background="?android:selectableItemBackground"/>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowdecade6"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/decade6"
+                android:layout_width="@dimen/letter_button_width"
+                android:layout_height="wrap_content"
+                android:text="70"
+                android:textSize="@dimen/letter_size"
+                android:textColor="@color/grey"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:background="?android:selectableItemBackground"/>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowdecade7"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/decade7"
+                android:layout_width="@dimen/letter_button_width"
+                android:layout_height="wrap_content"
+                android:text="80"
+                android:textSize="@dimen/letter_size"
+                android:textColor="@color/grey"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:background="?android:selectableItemBackground"/>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowdecade8"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/decade8"
+                android:layout_width="@dimen/letter_button_width"
+                android:layout_height="wrap_content"
+                android:text="90"
+                android:textSize="@dimen/letter_size"
+                android:textColor="@color/grey"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:background="?android:selectableItemBackground"/>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowdecade9"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/decade9"
+                android:layout_width="@dimen/letter_button_width"
+                android:layout_height="wrap_content"
+                android:text="00"
+                android:textSize="@dimen/letter_size"
+                android:textColor="@color/grey"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:background="?android:selectableItemBackground"/>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowdecade10"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/decade10"
+                android:layout_width="@dimen/letter_button_width"
+                android:layout_height="wrap_content"
+                android:text="10"
+                android:textSize="@dimen/letter_size"
+                android:textColor="@color/grey"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:background="?android:selectableItemBackground"/>
+        </TableRow>
+
+    </TableLayout>
 </RelativeLayout>
